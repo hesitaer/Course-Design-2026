@@ -4,7 +4,7 @@
 <!--        href="#"-->
 <!--      >关于我们</a><a href="#">联系我们</a></div>-->
       <div class="copyright">COPYRIGHT ©&nbsp;&nbsp;2026海外文物知识服务博物馆云平台&nbsp;&nbsp;ALL RIGHTS RESERVED</div>
-      <div class="copyright">计科2303 万玉贤，陈璐，欧阳雨青，詹伟豪，姜轶文，巫昊洋</div>
+      <div class="copyright">计科2303 万玉贤，陈璐，欧阳雨青，詹伟豪，姜轶文，倪亚伦</div>
       <img class="logo" src="@/assets/footer-logo.png">
     </div>
 </template>
