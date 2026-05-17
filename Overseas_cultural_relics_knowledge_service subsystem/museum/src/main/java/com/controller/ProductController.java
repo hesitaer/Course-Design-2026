@@ -5,15 +5,16 @@ import com.service.CollectService;
 import com.service.ICartService;
 import com.service.ICommentService;
 import com.service.IProductService;
-import com.service.Impl.ProductServiceImpl;
 import com.service.exception.CollectduplicateException;
 import com.service.exception.CommentPermissionException;
 import com.service.exception.InsertException;
 import com.service.exception.ProductNotFoundException;
 import com.util.JsonResult;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("search")//输入查询
+@RequestMapping("search")
 public class ProductController extends BaseController{
     @Autowired
     private IProductService iProductService;
@@ -32,7 +33,8 @@ public class ProductController extends BaseController{
     private ICommentService iCommentService;
     @Autowired
     private CollectService collectService;
-    @RequestMapping("/searchById")//文物详情页面
+
+    @RequestMapping("/searchById")
     public JsonResult<ProductView> findById(@RequestBody Map map){
         JsonResult<ProductView> result = new JsonResult<ProductView>();
         try{
@@ -63,7 +65,8 @@ public class ProductController extends BaseController{
         }
         return result;
     }
-    @RequestMapping("/searchById/comment")//评论文物
+
+    @RequestMapping("/searchById/comment")
     public JsonResult<Integer> comment(@RequestBody Map map ){
         JsonResult<Integer> result = new JsonResult<Integer>();
         try{
@@ -85,7 +88,8 @@ public class ProductController extends BaseController{
         }
         return result;
     }
-    @RequestMapping("/searchById/collect")//收藏文物
+
+    @RequestMapping("/searchById/collect")
     public JsonResult<Integer> collect(@RequestBody Map map ){
         JsonResult<Integer> result = new JsonResult<Integer>();
         try{
@@ -106,5 +110,86 @@ public class ProductController extends BaseController{
         return result;
     }
 
+    @GetMapping("/keyword")
+    public JsonResult<List<Product>> keywordSearch(@RequestParam String keyword) {
+        JsonResult<List<Product>> result = new JsonResult<>();
+        try {
+            List<Product> products = iProductService.searchByKeyword(keyword);
+            result.setData(products);
+            result.setState(200);
+            result.setMessage("查询成功");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
 
+    @PostMapping("/advanced")
+    public JsonResult<Map<String, Object>> advancedSearch(@RequestBody ProductQueryDTO queryDTO) {
+        JsonResult<Map<String, Object>> result = new JsonResult<>();
+        try {
+            Map<String, Object> data = iProductService.findByConditionsWithPage(queryDTO);
+            result.setData(data);
+            result.setState(200);
+            result.setMessage("查询成功");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/multi-filter")
+    public JsonResult<List<Product>> multiFilterSearch(@RequestBody ProductQueryDTO queryDTO) {
+        JsonResult<List<Product>> result = new JsonResult<>();
+        try {
+            List<Product> products = iProductService.findByConditions(queryDTO);
+            result.setData(products);
+            result.setState(200);
+            result.setMessage("查询成功，共找到 " + products.size() + " 条记录");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/export/csv")
+    public ResponseEntity<byte[]> exportToCSV(@RequestBody ProductQueryDTO queryDTO) {
+        try {
+            String csvContent = iProductService.exportToCSV(queryDTO);
+            byte[] csvBytes = csvContent.getBytes("UTF-8");
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
+            headers.setContentDispositionFormData("attachment", "cultural_relics_export.csv");
+            headers.setContentLength(csvBytes.length);
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(csvBytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/export/json")
+    public ResponseEntity<byte[]> exportToJSON(@RequestBody ProductQueryDTO queryDTO) {
+        try {
+            String jsonContent = iProductService.exportToJSON(queryDTO);
+            byte[] jsonBytes = jsonContent.getBytes("UTF-8");
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setContentDispositionFormData("attachment", "cultural_relics_export.json");
+            headers.setContentLength(jsonBytes.length);
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(jsonBytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
