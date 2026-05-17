@@ -6,5 +6,144 @@
         select * from cultural_relics_data where id = #{id}
     </select>
 
+    <select id="findByConditions" resultType="com.entity.Product">
+        SELECT * FROM cultural_relics_data
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (object_name LIKE CONCAT('%', #{keyword}, '%') 
+                     OR label LIKE CONCAT('%', #{keyword}, '%')
+                     OR medium LIKE CONCAT('%', #{keyword}, '%')
+                     OR makers_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="medium != null and medium != ''">
+                AND medium = #{medium}
+            </if>
+            <if test="objectType != null and objectType != ''">
+                AND object_type = #{objectType}
+            </if>
+            <if test="timePeriod != null and timePeriod != ''">
+                AND time_period = #{timePeriod}
+            </if>
+            <if test="geography != null and geography != ''">
+                AND geography = #{geography}
+            </if>
+            <if test="museum != null and museum != ''">
+                AND museum = #{museum}
+            </if>
+            <if test="cat1 != null and cat1 != ''">
+                AND cat1 = #{cat1}
+            </if>
+            <if test="cat2 != null and cat2 != ''">
+                AND cat2 = #{cat2}
+            </if>
+            <if test="cat3 != null and cat3 != ''">
+                AND cat3 = #{cat3}
+            </if>
+            <if test="makersName != null and makersName != ''">
+                AND makers_name LIKE CONCAT('%', #{makersName}, '%')
+            </if>
+            <if test="objectName != null and objectName != ''">
+                AND object_name LIKE CONCAT('%', #{objectName}, '%')
+            </if>
+        </where>
+        ORDER BY ${sortField} ${sortOrder}
+    </select>
 
+    <select id="findByConditionsWithPage" resultType="com.entity.Product">
+        SELECT * FROM cultural_relics_data
+        <where>
+            <if test="queryDTO.keyword != null and queryDTO.keyword != ''">
+                AND (object_name LIKE CONCAT('%', #{queryDTO.keyword}, '%') 
+                     OR label LIKE CONCAT('%', #{queryDTO.keyword}, '%')
+                     OR medium LIKE CONCAT('%', #{queryDTO.keyword}, '%')
+                     OR makers_name LIKE CONCAT('%', #{queryDTO.keyword}, '%'))
+            </if>
+            <if test="queryDTO.medium != null and queryDTO.medium != ''">
+                AND medium = #{queryDTO.medium}
+            </if>
+            <if test="queryDTO.objectType != null and queryDTO.objectType != ''">
+                AND object_type = #{queryDTO.objectType}
+            </if>
+            <if test="queryDTO.timePeriod != null and queryDTO.timePeriod != ''">
+                AND time_period = #{queryDTO.timePeriod}
+            </if>
+            <if test="queryDTO.geography != null and queryDTO.geography != ''">
+                AND geography = #{queryDTO.geography}
+            </if>
+            <if test="queryDTO.museum != null and queryDTO.museum != ''">
+                AND museum = #{queryDTO.museum}
+            </if>
+            <if test="queryDTO.cat1 != null and queryDTO.cat1 != ''">
+                AND cat1 = #{queryDTO.cat1}
+            </if>
+            <if test="queryDTO.cat2 != null and queryDTO.cat2 != ''">
+                AND cat2 = #{queryDTO.cat2}
+            </if>
+            <if test="queryDTO.cat3 != null and queryDTO.cat3 != ''">
+                AND cat3 = #{queryDTO.cat3}
+            </if>
+            <if test="queryDTO.makersName != null and queryDTO.makersName != ''">
+                AND makers_name LIKE CONCAT('%', #{queryDTO.makersName}, '%')
+            </if>
+            <if test="queryDTO.objectName != null and queryDTO.objectName != ''">
+                AND object_name LIKE CONCAT('%', #{queryDTO.objectName}, '%')
+            </if>
+        </where>
+        ORDER BY ${queryDTO.sortField} ${queryDTO.sortOrder}
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countByConditions" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM cultural_relics_data
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (object_name LIKE CONCAT('%', #{keyword}, '%') 
+                     OR label LIKE CONCAT('%', #{keyword}, '%')
+                     OR medium LIKE CONCAT('%', #{keyword}, '%')
+                     OR makers_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="medium != null and medium != ''">
+                AND medium = #{medium}
+            </if>
+            <if test="objectType != null and objectType != ''">
+                AND object_type = #{objectType}
+            </if>
+            <if test="timePeriod != null and timePeriod != ''">
+                AND time_period = #{timePeriod}
+            </if>
+            <if test="geography != null and geography != ''">
+                AND geography = #{geography}
+            </if>
+            <if test="museum != null and museum != ''">
+                AND museum = #{museum}
+            </if>
+            <if test="cat1 != null and cat1 != ''">
+                AND cat1 = #{cat1}
+            </if>
+            <if test="cat2 != null and cat2 != ''">
+                AND cat2 = #{cat2}
+            </if>
+            <if test="cat3 != null and cat3 != ''">
+                AND cat3 = #{cat3}
+            </if>
+            <if test="makersName != null and makersName != ''">
+                AND makers_name LIKE CONCAT('%', #{makersName}, '%')
+            </if>
+            <if test="objectName != null and objectName != ''">
+                AND object_name LIKE CONCAT('%', #{objectName}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="searchByKeyword" resultType="com.entity.Product">
+        SELECT * FROM cultural_relics_data
+        WHERE object_name LIKE CONCAT('%', #{keyword}, '%')
+           OR label LIKE CONCAT('%', #{keyword}, '%')
+           OR medium LIKE CONCAT('%', #{keyword}, '%')
+           OR makers_name LIKE CONCAT('%', #{keyword}, '%')
+           OR geography LIKE CONCAT('%', #{keyword}, '%')
+           OR time_period LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY id ASC
+        LIMIT 20
+    </select>
 </mapper>
