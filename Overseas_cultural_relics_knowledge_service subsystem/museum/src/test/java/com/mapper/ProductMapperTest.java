@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigInteger;
-
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class ProductMapperTest {
@@ -16,8 +14,9 @@ public class ProductMapperTest {
     private ProductMapper productMapper;
 
     @Test
-    public void findByProduct_id(){
-        Product product = productMapper.findByProduct_id(BigInteger.valueOf(1));
-        System.out.println(product.toString());
+    public void findByProductId(){
+        // 使用复合主键查询：museumId=1(史密森尼), objectId示例值
+        Product product = productMapper.findByProductId(1, "test_object_id");
+        System.out.println(product != null ? product.toString() : "未找到文物");
     }
 }

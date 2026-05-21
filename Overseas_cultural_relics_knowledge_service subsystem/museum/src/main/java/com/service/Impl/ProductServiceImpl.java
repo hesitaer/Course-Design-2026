@@ -18,18 +18,24 @@ public class ProductServiceImpl implements IProductService {
     private ProductMapper productMapper;
     @Autowired
     private FindImageMapper findImageMapper;
+    /**
+     * 通过复合主键查询文物详情
+     * @param museumId 博物馆ID
+     * @param objectId 文物编号
+     * @return Product 文物对象
+     */
     @Override
-    public Product findByProduct_id(BigInteger id){
-        Product product ;
-        product = productMapper.findByProduct_id(id);
-        if(product == null)
-        {
+    public Product findByProductId(Integer museumId, String objectId){
+        Product product = productMapper.findByProductId(museumId, objectId);
+        if(product == null) {
             throw new ProductNotFoundException("该文物不存在");
         }
-        if(product.getImg_url()==null) return product;
-        String[] address = product.getImg_url().split(",");
-        product.setImg_url(address[0]);
-        product.setImg_url(findImageMapper.findImage(product.getImg_url()));
+        // 处理图片URL
+        if(product.getImageUrl() != null) {
+            String[] address = product.getImageUrl().split(",");
+            product.setImageUrl(address[0]);
+            product.setImageUrl(findImageMapper.findImage(product.getImageUrl()));
+        }
         return product;
     }
 

@@ -2,86 +2,229 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mapper.CartMapper">
+    <!--
+        数据查询模块SQL映射
+        表名：cultural_relics_data → artifact
+        为了兼容 Cart.java 实体类，使用 AS 别名映射
+    -->
 
     <select id="findByMuseum" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where museum = #{museum} LIMIT 1,100
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE museum = #{museum} 
+        LIMIT 1,100
     </select>
+
     <!--REGEXP包含查询-->
     <select id="findByCat1" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where cat1 REGEXP #{cat1} LIMIT 100,100
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE material REGEXP #{cat1} 
+        LIMIT 100,100
     </select>
 
     <select id="findByCat2" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where cat2 = #{cat2} LIMIT 200,100
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE dynasty = #{cat2} 
+        LIMIT 200,100
     </select>
 
     <select id="findByCat3" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where cat3 REGEXP #{cat3} LIMIT 300,100
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE type REGEXP #{cat3} 
+        LIMIT 300,100
     </select>
 
     <select id="sortByNameUp" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data
-        order by object_name asc
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact
+        ORDER BY title ASC
     </select>
 
     <select id="sortByNameDown" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data
-        order by object_name desc
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact
+        ORDER BY title DESC
     </select>
 
     <select id="sortByTimeUp" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data
-        order by time_period asc
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact
+        ORDER BY period ASC
     </select>
 
     <select id="sortByTimeDown" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data
-        order by time_period desc
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact
+        ORDER BY period DESC
     </select>
 
     <select id="findByMulti" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data
-        where museum = #{museum} and cat1 REGEXP #{cat1} and cat2=#{cat2} and cat3 REGEXP #{cat3}
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact
+        WHERE museum = #{museum} 
+          AND material REGEXP #{cat1} 
+          AND dynasty = #{cat2} 
+          AND type REGEXP #{cat3}
     </select>
 
     <select id="obscureSearch" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data
-        where   label REGEXP #{str} or medium REGEXP #{str}
-        or object_name REGEXP #{str} or object_type REGEXP #{str} or previous_owner REGEXP #{str} or
-        provenance REGEXP #{str} or time_period REGEXP #{str} or cat1 REGEXP #{str} or cat3 REGEXP #{str}  #{str} or makers_name REGEXP #{str} LIMIT 400,100
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact
+        WHERE 
+            artist_bio REGEXP #{str} 
+            OR material REGEXP #{str}
+            OR title REGEXP #{str} 
+            OR type REGEXP #{str} 
+            OR provenance REGEXP #{str}
+            OR period REGEXP #{str} 
+            OR artist REGEXP #{str} 
+        LIMIT 400,100
     </select>
 
     <select id="findone" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where id != #{id} LIMIT ${start},${end}
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE museum_id != #{id} 
+        LIMIT #{start},#{end}
     </select>
 
     <select id="findByMuseum1" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where museum= #{museum} and id != #{id} LIMIT ${start},${end}
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE museum = #{museum} 
+          AND museum_id != #{id} 
+        LIMIT #{start},#{end}
     </select>
+
     <select id="findBymakername1" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where makers_name= #{makers_name} and id != #{id} LIMIT ${start},${end}
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE artist = #{makersName} 
+          AND museum_id != #{id} 
+        LIMIT #{start},#{end}
     </select>
 
     <select id="findBytime1" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where cat2= #{cat2} and id != #{id} LIMIT ${start},${end}
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE dynasty = #{cat2} 
+          AND museum_id != #{id} 
+        LIMIT #{start},#{end}
     </select>
 
     <select id="findBygeography" resultType="com.entity.Cart">
-        select id,object_name,cat1,cat2,cat3,makers_name,img_url
-        from cultural_relics_data where geography= #{geography} and id != #{id} LIMIT ${start},${end}
+        SELECT 
+            museum_id AS id,
+            title AS object_name,
+            material AS cat1,
+            dynasty AS cat2,
+            type AS cat3,
+            artist AS makers_name,
+            image_url AS img_url
+        FROM artifact 
+        WHERE culture = #{culture} 
+          AND museum_id != #{id} 
+        LIMIT #{start},#{end}
     </select>
 </mapper>

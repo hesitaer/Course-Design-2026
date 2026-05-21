@@ -1,27 +1,40 @@
 package com.entity;
 
-import com.service.exception.ProductNotFoundException;
-
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductView extends Product  {
+/**
+ * 文物详情视图实体（包含评论和推荐信息）
+ */
+public class ProductView extends Product {
+    
+    /**
+     * 评论列表
+     */
     private ArrayList<CommentView> commentView;
+    
+    /**
+     * 是否已收藏 (0=未收藏, 1=已收藏)
+     */
     private int if_collect;
+    
+    /**
+     * 推荐文物列表
+     */
     private List<Cart> recommend;
+
+    /**
+     * 无参构造函数
+     */
+    public ProductView() {
+        super();
+    }
+
+    /**
+     * 带评论列表的构造函数
+     */
     public ProductView(ArrayList<CommentView> commentView) {
         this.commentView = commentView;
-    }
-
-    public ProductView(BigInteger id, String bibliography, String credit, String dimensions, String geography, String img_url, String label, String medium, String object_name, String object_type, String previous_owner, String provenance, String time_period, String url, String cat1, String cat2, String cat3, String makers_job, String makers_name, String makers_born, String relics_id, String museum, String object_id, ArrayList<CommentView> commentView, int if_collect) {
-        super(id, bibliography, credit, dimensions, geography, img_url, label, medium, object_name, object_type, previous_owner, provenance, time_period, url, cat1, cat2, cat3, makers_job, makers_name, makers_born, relics_id, museum, object_id);
-        this.commentView = commentView;
-        this.if_collect = if_collect;
-    }
-
-    public ProductView() {
-
     }
 
     public List<Cart> getRecommend() {

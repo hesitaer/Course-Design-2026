@@ -1,276 +1,176 @@
 package com.entity;
 
-import lombok.Data;
-
 import java.io.Serializable;
-import java.math.BigInteger;
-@Data
-public class Product  {
-    private BigInteger id;
-    private String bibliography;//参考文献
-    private String credit;//捐赠信息
-    private String dimensions;//规格
-    private String geography;//产地
-    private String img_url;//图片
-    private String label;//作者简介故事
-    private String medium;//材质
-    private String object_name;//文物姓名
-    private String object_type;//展区
-    private String previous_owner;//前拥有者
-    private String provenance;//出处
-    private String time_period;//具体时期
-    private String url;//原本文物详情链接
-    private String cat1;//材质，分类查询
-    private String cat2;//朝代里的拓展，分类查询，时间轴数据
-    private String cat3;//分类，分类查询
-    private String makers_job;//制作者工作
-    private String makers_name;//制作者名字
-    private String makers_born;//制作者出生
-    private String relics_id;
-    private String museum;
-    private String object_id;
+import java.util.Date;
 
+/**
+ * 海外藏中国文物实体类
+ * 对应数据库表：artifact
+ */
+public class Product implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
+
+    // ============ 核心标识字段 ============
+    private String objectId;                        // 文物唯一编号（馆方/EDAN）
+    private Integer museumId;                       // 馆别：1史密森尼 2哈佛 3波士顿MFA
+    private String accessionNumber;                 // 藏品编号
+
+    // ============ 基础信息字段 ============
+    private String title;                           // 文物名称
+    private String artist;                          // 作者/制作者
+    private String artistProvince;                  // 作者相关省份（推断）
+    private String dynasty;                         // 朝代
+    private String artistWikidataId;                // Wikidata Q号
+    private String artistBirth;                     // 作者生年
+    private String artistDeath;                     // 作者卒年
+    private String artistBio;                       // 作者简介
+    private String artistWikipediaSummary;          // 维基摘要
+    private String artistEnrichedAt;                // 作者信息补全时间
+
+    // ============ 年代与类型字段 ============
+    private String period;                          // 年代/时期原文
+    private Short periodStartYear;                  // 起始年
+    private Short periodEndYear;                    // 结束年
+    private String type;                            // 文物类型
+    private String material;                        // 材质
+    private String culture;                         // 文化/地域标签
+
+    // ============ 描述与来源字段 ============
+    private String description;                     // 文物介绍
+    private String provenance;                      // 流传经历
+    private String bibliography;                    // 参考文献
+    private String dimensions;                      // 尺寸
+
+    // ============ 博物馆信息字段 ============
+    private String museum;                          // 所属博物馆
+    private String location;                        // 博物馆所在地
+    private String detailUrl;                       // 详情页URL
+    private String imageUrl;                        // 图片原始URL
+    private String iiifManifestUrl;                 // IIIF manifest（哈佛）
+    private String imagePath;                       // 本地相对图片路径
+    private String creditLine;                      // 版权/来源说明
+    private Date crawlDate;                         // 爬取日期
+
+    /**
+     * 无参构造函数
+     */
     public Product() {
     }
 
-    public Product(BigInteger id, String bibliography, String credit, String dimensions, String geography, String img_url, String label, String medium, String object_name, String object_type, String previous_owner, String provenance, String time_period, String url, String cat1, String cat2, String cat3, String makers_job, String makers_name, String makers_born, String relics_id, String museum, String object_id) {
-        this.id = id;
-        this.bibliography = bibliography;
-        this.credit = credit;
-        this.dimensions = dimensions;
-        this.geography = geography;
-        this.img_url = img_url;
-        this.label = label;
-        this.medium = medium;
-        this.object_name = object_name;
-        this.object_type = object_type;
-        this.previous_owner = previous_owner;
-        this.provenance = provenance;
-        this.time_period = time_period;
-        this.url = url;
-        this.cat1 = cat1;
-        this.cat2 = cat2;
-        this.cat3 = cat3;
-        this.makers_job = makers_job;
-        this.makers_name = makers_name;
-        this.makers_born = makers_born;
-        this.relics_id = relics_id;
-        this.museum = museum;
-        this.object_id = object_id;
+    /**
+     * 有参构造函数
+     */
+    public Product(Integer museumId, String objectId, String title, String artist) {
+        this.museumId = museumId;
+        this.objectId = objectId;
+        this.title = title;
+        this.artist = artist;
     }
 
-    public BigInteger getId() {
-        return id;
-    }
+    // ========== Getter/Setter 方法 ==========
+    public String getObjectId() { return objectId; }
+    public void setObjectId(String objectId) { this.objectId = objectId; }
 
-    public void setId(BigInteger id) {
-        this.id = id;
-    }
+    public Integer getMuseumId() { return museumId; }
+    public void setMuseumId(Integer museumId) { this.museumId = museumId; }
 
-    public String getBibliography() {
-        return bibliography;
-    }
+    public String getAccessionNumber() { return accessionNumber; }
+    public void setAccessionNumber(String accessionNumber) { this.accessionNumber = accessionNumber; }
 
-    public void setBibliography(String bibliography) {
-        this.bibliography = bibliography;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getCredit() {
-        return credit;
-    }
+    public String getArtist() { return artist; }
+    public void setArtist(String artist) { this.artist = artist; }
 
-    public void setCredit(String credit) {
-        this.credit = credit;
-    }
+    public String getArtistProvince() { return artistProvince; }
+    public void setArtistProvince(String artistProvince) { this.artistProvince = artistProvince; }
 
-    public String getDimensions() {
-        return dimensions;
-    }
+    public String getDynasty() { return dynasty; }
+    public void setDynasty(String dynasty) { this.dynasty = dynasty; }
 
-    public void setDimensions(String dimensions) {
-        this.dimensions = dimensions;
-    }
+    public String getArtistWikidataId() { return artistWikidataId; }
+    public void setArtistWikidataId(String artistWikidataId) { this.artistWikidataId = artistWikidataId; }
 
-    public String getGeography() {
-        return geography;
-    }
+    public String getArtistBirth() { return artistBirth; }
+    public void setArtistBirth(String artistBirth) { this.artistBirth = artistBirth; }
 
-    public void setGeography(String geography) {
-        this.geography = geography;
-    }
+    public String getArtistDeath() { return artistDeath; }
+    public void setArtistDeath(String artistDeath) { this.artistDeath = artistDeath; }
 
-    public String getImg_url() {
-        return img_url;
-    }
+    public String getArtistBio() { return artistBio; }
+    public void setArtistBio(String artistBio) { this.artistBio = artistBio; }
 
-    public void setImg_url(String img_url) {
-        this.img_url = img_url;
-    }
+    public String getArtistWikipediaSummary() { return artistWikipediaSummary; }
+    public void setArtistWikipediaSummary(String artistWikipediaSummary) { this.artistWikipediaSummary = artistWikipediaSummary; }
 
-    public String getLabel() {
-        return label;
-    }
+    public String getArtistEnrichedAt() { return artistEnrichedAt; }
+    public void setArtistEnrichedAt(String artistEnrichedAt) { this.artistEnrichedAt = artistEnrichedAt; }
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
+    public String getPeriod() { return period; }
+    public void setPeriod(String period) { this.period = period; }
 
-    public String getMakers_job() {
-        return makers_job;
-    }
+    public Short getPeriodStartYear() { return periodStartYear; }
+    public void setPeriodStartYear(Short periodStartYear) { this.periodStartYear = periodStartYear; }
 
-    public void setMakers_job(String makers_job) {
-        this.makers_job = makers_job;
-    }
+    public Short getPeriodEndYear() { return periodEndYear; }
+    public void setPeriodEndYear(Short periodEndYear) { this.periodEndYear = periodEndYear; }
 
-    public String getMakers_name() {
-        return makers_name;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public void setMakers_name(String makers_name) {
-        this.makers_name = makers_name;
-    }
+    public String getMaterial() { return material; }
+    public void setMaterial(String material) { this.material = material; }
 
-    public String getMakers_born() {
-        return makers_born;
-    }
+    public String getCulture() { return culture; }
+    public void setCulture(String culture) { this.culture = culture; }
 
-    public void setMakers_born(String makers_born) {
-        this.makers_born = makers_born;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getMedium() {
-        return medium;
-    }
+    public String getProvenance() { return provenance; }
+    public void setProvenance(String provenance) { this.provenance = provenance; }
 
-    public void setMedium(String medium) {
-        this.medium = medium;
-    }
+    public String getBibliography() { return bibliography; }
+    public void setBibliography(String bibliography) { this.bibliography = bibliography; }
 
-    public String getObject_name() {
-        return object_name;
-    }
+    public String getDimensions() { return dimensions; }
+    public void setDimensions(String dimensions) { this.dimensions = dimensions; }
 
-    public void setObject_name(String object_name) {
-        this.object_name = object_name;
-    }
+    public String getMuseum() { return museum; }
+    public void setMuseum(String museum) { this.museum = museum; }
 
-    public String getObject_type() {
-        return object_type;
-    }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    public void setObject_type(String object_type) {
-        this.object_type = object_type;
-    }
+    public String getDetailUrl() { return detailUrl; }
+    public void setDetailUrl(String detailUrl) { this.detailUrl = detailUrl; }
 
-    public String getPrevious_owner() {
-        return previous_owner;
-    }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public void setPrevious_owner(String previous_owner) {
-        this.previous_owner = previous_owner;
-    }
+    public String getIiifManifestUrl() { return iiifManifestUrl; }
+    public void setIiifManifestUrl(String iiifManifestUrl) { this.iiifManifestUrl = iiifManifestUrl; }
 
-    public String getProvenance() {
-        return provenance;
-    }
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 
-    public void setProvenance(String provenance) {
-        this.provenance = provenance;
-    }
+    public String getCreditLine() { return creditLine; }
+    public void setCreditLine(String creditLine) { this.creditLine = creditLine; }
 
-    public String getTime_period() {
-        return time_period;
-    }
-
-    public void setTime_period(String time_period) {
-        this.time_period = time_period;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getCat1() {
-        return cat1;
-    }
-
-    public void setCat1(String cat1) {
-        this.cat1 = cat1;
-    }
-
-    public String getCat2() {
-        return cat2;
-    }
-
-    public void setCat2(String cat2) {
-        this.cat2 = cat2;
-    }
-
-    public String getCat3() {
-        return cat3;
-    }
-
-    public void setCat3(String cat3) {
-        this.cat3 = cat3;
-    }
-
-    public String getMuseum() {
-        return museum;
-    }
-
-    public void setMuseum(String museum) {
-        this.museum = museum;
-    }
-
-    public String getRelics_id() {
-        return relics_id;
-    }
-
-    public void setRelics_id(String relics_id) {
-        this.relics_id = relics_id;
-    }
-
-
-
-    public String getObject_id() {
-        return object_id;
-    }
-
-    public void setObject_id(String object_id) {
-        this.object_id = object_id;
-    }
+    public Date getCrawlDate() { return crawlDate; }
+    public void setCrawlDate(Date crawlDate) { this.crawlDate = crawlDate; }
 
     @Override
     public String toString() {
         return "Product{" +
-                "id=" + id +
-                ", bibliography='" + bibliography + '\'' +
-                ", credit='" + credit + '\'' +
-                ", dimensions='" + dimensions + '\'' +
-                ", geography='" + geography + '\'' +
-                ", img_url='" + img_url + '\'' +
-                ", label='" + label + '\'' +
-                ", medium='" + medium + '\'' +
-                ", object_name='" + object_name + '\'' +
-                ", object_type='" + object_type + '\'' +
-                ", previous_owner='" + previous_owner + '\'' +
-                ", provenance='" + provenance + '\'' +
-                ", time_period='" + time_period + '\'' +
-                ", url='" + url + '\'' +
-                ", cat1='" + cat1 + '\'' +
-                ", cat2='" + cat2 + '\'' +
-                ", cat3='" + cat3 + '\'' +
-                ", makers_job='" + makers_job + '\'' +
-                ", makers_name='" + makers_name + '\'' +
-                ", makers_born='" + makers_born + '\'' +
-                ", relics_id='" + relics_id + '\'' +
+                "objectId='" + objectId + '\'' +
+                ", museumId=" + museumId +
+                ", title='" + title + '\'' +
+                ", artist='" + artist + '\'' +
+                ", dynasty='" + dynasty + '\'' +
                 ", museum='" + museum + '\'' +
-                ", object_id='" + object_id + '\'' +
                 '}';
     }
 }

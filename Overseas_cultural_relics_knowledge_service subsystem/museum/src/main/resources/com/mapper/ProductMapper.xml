@@ -2,9 +2,45 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mapper.ProductMapper">
-    <select id="findByProduct_id" resultType="com.entity.Product">
-        select * from cultural_relics_data where id = #{id}
+    <!--
+        通过复合主键查询文物详情
+        表名：cultural_relics_data → artifact
+        字段名全部使用新表规范
+    -->
+    <select id="findByProductId" resultType="com.entity.Product">
+        SELECT 
+            museum_id AS museumId,
+            object_id AS objectId,
+            title,
+            artist,
+            artist_province AS artistProvince,
+            dynasty,
+            artist_wikidata_id AS artistWikidataId,
+            artist_birth AS artistBirth,
+            artist_death AS artistDeath,
+            artist_bio AS artistBio,
+            artist_wikipedia_summary AS artistWikipediaSummary,
+            artist_enriched_at AS artistEnrichedAt,
+            period,
+            period_start_year AS periodStartYear,
+            period_end_year AS periodEndYear,
+            type,
+            material,
+            culture,
+            description,
+            provenance,
+            bibliography,
+            dimensions,
+            museum,
+            location,
+            detail_url AS detailUrl,
+            image_url AS imageUrl,
+            iiif_manifest_url AS iiifManifestUrl,
+            image_path AS imagePath,
+            credit_line AS creditLine,
+            accession_number AS accessionNumber,
+            crawl_date AS crawlDate
+        FROM artifact
+        WHERE museum_id = #{museumId} AND object_id = #{objectId}
     </select>
-
-
 </mapper>
