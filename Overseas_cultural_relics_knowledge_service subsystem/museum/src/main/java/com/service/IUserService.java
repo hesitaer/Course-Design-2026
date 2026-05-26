@@ -3,10 +3,10 @@ package com.service;
 import com.entity.User;
 
 public interface IUserService {
-    User log(int user_id, String user_password);
+    User log(Long user_id, String password);
     User loginByUsername(String username, String password);
-    User reg(String user_password,String user_name,int user_sex,String user_tel);
-    int up(int user_id,String old_password,String user_password,String user_name,int user_sex,String user_tel);
-    int del(int user_id);
-
+    User reg(String password, String username, Integer sex, String phone);
+    int up(Long user_id, String old_password, String password, String username, String nickname, Integer sex, String email, String phone, String avatar_url);
+    int del(Long user_id);
+    User getUserById(Long user_id);
 }

@@ -40,7 +40,7 @@ public class UserAdminController {
             String s = (String)map.get("sex");
             int sex = Integer.parseInt(s);
             String user_tel = (String)map.get("tel");
-            int row = iUserService.up(user_id,old_pass,user_password,user_name,sex,user_tel);
+            int row = iUserService.up(Long.valueOf(user_id), old_pass, user_password, user_name, null, sex, null, user_tel, null);
             result.setData(row);
             result.setState(200);
             result.setMessage("更新成功！");
