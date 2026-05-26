@@ -36,7 +36,7 @@
 
       <router-link to="/personpage" v-if="isLogin">
         <div class="float-right">
-          <el-menu-item class="disable-element-hover" index="personpage">后台管理</el-menu-item>
+          <el-menu-item class="disable-element-hover" index="personpage">个人中心</el-menu-item>
         </div>
       </router-link>
       <div v-if="isLogin">

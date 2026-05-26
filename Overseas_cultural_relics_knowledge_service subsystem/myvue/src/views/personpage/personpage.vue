@@ -4,7 +4,7 @@
     <el-container style="height: 800px; border: 1px solid #eee;">
       <el-aside width="200px" style="margin-top: 1%" >
         <div style="width: 190px;background-color: white;padding: 5px;margin: auto">
-          <img src="@/assets/timg.jpeg" width="150px" height="150px" style="border-radius: 300px;margin-left: 8%">
+          <img :src="user.userpic" width="150px" height="150px" style="border-radius: 300px;margin-left: 8%">
           <br>
           <br>
           <p style="margin:0 auto;text-align: center">{{user.username}}</p>
@@ -62,8 +62,8 @@
     data () {
       return {
         user: {
-          userpic: '@/assets/timg.jpeg',
-          username: '游客'
+          userpic: '',
+          username: ''
         }
       }
     },
@@ -73,10 +73,26 @@
     },
     methods: {
       pageInit () {
-        // if (storage.getItem('islogin') !== 1) {
-        //   alert('请先登录！')
-        //   window.history.back()
-        // }
+        // 从 localStorage 读取用户信息（与登录页面存储的键名一致）
+        const isLogin = storage.getItem('islogin')
+        const username = storage.getItem('user_username')
+        const avatar = storage.getItem('user_avatar')
+        
+        if (isLogin === '1' && username) {
+          this.user.username = username
+          // 处理头像URL：如果是相对路径则拼接完整地址
+          if (avatar) {
+            this.user.userpic = avatar.startsWith('http') 
+              ? avatar 
+              : 'http://localhost:8085' + avatar
+          } else {
+            this.user.userpic = '/src/assets/timg.jpeg'
+          }
+        } else {
+          // 如果没有登录信息，显示默认值
+          this.user.username = '游客'
+          this.user.userpic = '/src/assets/timg.jpeg'
+        }
       }
     }
   }

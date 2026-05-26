@@ -16,16 +16,6 @@
       <el-descriptions-item label="邮箱">
         <span>{{ userInfo.email || '未绑定' }}</span>
       </el-descriptions-item>
-      <el-descriptions-item label="头像">
-        <img v-if="userInfo.avatar_url" :src="userInfo.avatar_url" class="avatar" />
-        <span v-else>未设置</span>
-      </el-descriptions-item>
-      <el-descriptions-item label="注册时间">
-        <span>{{ formatDate(userInfo.register_time) }}</span>
-      </el-descriptions-item>
-      <el-descriptions-item label="最近登录">
-        <span>{{ formatDate(userInfo.last_login_at) }}</span>
-      </el-descriptions-item>
     </el-descriptions>
   </div>
 </template>

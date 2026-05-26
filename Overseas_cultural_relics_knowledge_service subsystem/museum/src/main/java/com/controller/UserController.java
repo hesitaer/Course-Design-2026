@@ -12,9 +12,12 @@ import com.util.JsonResult;
 import com.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("users")
@@ -116,8 +119,17 @@ public class UserController {
             String password = (String)map.get("password");
             String username = (String)map.get("username");
             String nickname = (String)map.get("nickname");
-            String sexStr = (String)map.get("sex");
-            Integer sex = sexStr != null ? Integer.parseInt(sexStr) : null;
+            // 处理 sex 字段`sex` TINYINT '性别：0未知1男2女',
+            Integer sex = null;
+            Object sexObj = map.get("sex");
+            if (sexObj != null) {
+                if (sexObj instanceof Integer) {
+                    sex = (Integer) sexObj;
+                } else if (sexObj instanceof String) {
+                    String sexStr = (String) sexObj;
+                    sex = !sexStr.isEmpty() ? Integer.parseInt(sexStr) : null;
+                }
+            }
             String email = (String)map.get("email");
             String phone = (String)map.get("phone");
             String avatar_url = (String)map.get("avatar_url");
@@ -175,5 +187,75 @@ public class UserController {
             ip = ip.split(",")[0].trim();
         }
         return ip;
+    }
+
+    /**
+     * 头像上传接口
+     * 说明：处理用户头像上传，保存到服务器文件系统，并返回访问路径
+     * 
+     * @param file 上传的头像文件
+     * @return 头像访问路径
+     */
+    @RequestMapping("/upload_avatar")
+    public JsonResult<String> uploadAvatar(@RequestParam("file") MultipartFile file) {
+        JsonResult<String> result = new JsonResult<String>();
+        try {
+            if (file.isEmpty()) {
+                result.setState(4000);
+                result.setMessage("请选择要上传的图片");
+                return result;
+            }
+
+            // 检查文件大小（最大2MB）
+            if (file.getSize() > 2 * 1024 * 1024) {
+                result.setState(4000);
+                result.setMessage("图片大小不能超过2MB");
+                return result;
+            }
+
+            // 检查文件格式
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || 
+                (!originalFilename.endsWith(".jpg") && 
+                 !originalFilename.endsWith(".jpeg") && 
+                 !originalFilename.endsWith(".png"))) {
+                result.setState(4000);
+                result.setMessage("只支持JPG/JPEG/PNG格式");
+                return result;
+            }
+
+            // 生成唯一文件名
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String filename = UUID.randomUUID().toString() + extension;
+
+            // 保存文件路径（使用绝对路径，确保目录存在）
+            String uploadPath = System.getProperty("user.dir") + "/uploads/avatar/";
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                boolean created = uploadDir.mkdirs();
+                if (created) {
+                    System.out.println("上传目录创建成功: " + uploadPath);
+                } else {
+                    throw new Exception("无法创建上传目录");
+                }
+            }
+
+            // 保存文件
+            File dest = new File(uploadPath + filename);
+            file.transferTo(dest);
+            System.out.println("文件保存成功: " + dest.getAbsolutePath());
+
+            // 返回访问路径
+            String avatarUrl = "/uploads/avatar/" + filename;
+            result.setState(200);
+            result.setData(avatarUrl);
+            result.setMessage("上传成功");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setState(5000);
+            result.setMessage("上传失败：" + e.getMessage());
+        }
+        return result;
     }
 }
