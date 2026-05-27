@@ -11,7 +11,6 @@ import com.service.exception.ProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,27 +21,36 @@ public class ProductServiceImpl implements IProductService {
     private ProductMapper productMapper;
     @Autowired
     private FindImageMapper findImageMapper;
-
+    
+    /**
+     * 通过复合主键查询文物详情
+     * @param museumId 博物馆ID
+     * @param objectId 文物编号
+     * @return Product 文物对象
+     */
     @Override
-    public Product findByProduct_id(BigInteger id){
-        Product product ;
-        product = productMapper.findByProduct_id(id);
-        if(product == null)
-        {
+    public Product findByProductId(Integer museumId, String objectId){
+        Product product = productMapper.findByProductId(museumId, objectId);
+        if(product == null) {
             throw new ProductNotFoundException("该文物不存在");
         }
-        if(product.getImg_url()==null) return product;
-        String[] address = product.getImg_url().split(",");
-        product.setImg_url(address[0]);
-        product.setImg_url(findImageMapper.findImage(product.getImg_url()));
+        // 处理图片URL
+        if(product.getImageUrl() != null) {
+            String[] address = product.getImageUrl().split(",");
+            product.setImageUrl(address[0]);
+            product.setImageUrl(findImageMapper.findImage(product.getImageUrl()));
+        }
         return product;
     }
-
+    
     @Override
     public List<Product> findByConditions(ProductQueryDTO queryDTO) {
-        return productMapper.findByConditions(queryDTO);
+        List<Product> products = productMapper.findByConditions(queryDTO);
+        // 处理图片URL
+        processImageUrls(products);
+        return products;
     }
-
+    
     @Override
     public Map<String, Object> findByConditionsWithPage(ProductQueryDTO queryDTO) {
         Map<String, Object> result = new HashMap<>();
@@ -54,6 +62,9 @@ public class ProductServiceImpl implements IProductService {
         List<Product> products = productMapper.findByConditionsWithPage(queryDTO, offset, pageSize);
         Integer total = productMapper.countByConditions(queryDTO);
         
+        // 处理图片URL
+        processImageUrls(products);
+        
         result.put("list", products);
         result.put("total", total);
         result.put("pageNum", pageNum);
@@ -62,42 +73,39 @@ public class ProductServiceImpl implements IProductService {
         
         return result;
     }
-
+    
     @Override
     public List<Product> searchByKeyword(String keyword) {
-        return productMapper.searchByKeyword(keyword);
+        List<Product> products = productMapper.searchByKeyword(keyword);
+        processImageUrls(products);
+        return products;
     }
-
+    
     @Override
     public String exportToCSV(ProductQueryDTO queryDTO) {
         List<Product> products = productMapper.findByConditions(queryDTO);
         
         StringBuilder csv = new StringBuilder();
-        csv.append("ID,文物名称,材质,展区,时期,产地,博物馆,图片链接,简介,规格,出处,捐赠信息,参考文献,前拥有者,制作者,制作者职业,制作者出生年份\n");
+        csv.append("museumId,objectId,title,artist,dynasty,period,type,material,culture,museum,location,imageUrl\n");
         
         for (Product product : products) {
-            csv.append(product.getId()).append(",");
-            csv.append(escapeCSV(product.getObject_name())).append(",");
-            csv.append(escapeCSV(product.getMedium())).append(",");
-            csv.append(escapeCSV(product.getObject_type())).append(",");
-            csv.append(escapeCSV(product.getTime_period())).append(",");
-            csv.append(escapeCSV(product.getGeography())).append(",");
+            csv.append(escapeCSV(product.getMuseumId() != null ? product.getMuseumId().toString() : "")).append(",");
+            csv.append(escapeCSV(product.getObjectId())).append(",");
+            csv.append(escapeCSV(product.getTitle())).append(",");
+            csv.append(escapeCSV(product.getArtist())).append(",");
+            csv.append(escapeCSV(product.getDynasty())).append(",");
+            csv.append(escapeCSV(product.getPeriod())).append(",");
+            csv.append(escapeCSV(product.getType())).append(",");
+            csv.append(escapeCSV(product.getMaterial())).append(",");
+            csv.append(escapeCSV(product.getCulture())).append(",");
             csv.append(escapeCSV(product.getMuseum())).append(",");
-            csv.append(escapeCSV(product.getImg_url())).append(",");
-            csv.append(escapeCSV(product.getLabel())).append(",");
-            csv.append(escapeCSV(product.getDimensions())).append(",");
-            csv.append(escapeCSV(product.getProvenance())).append(",");
-            csv.append(escapeCSV(product.getCredit())).append(",");
-            csv.append(escapeCSV(product.getBibliography())).append(",");
-            csv.append(escapeCSV(product.getPrevious_owner())).append(",");
-            csv.append(escapeCSV(product.getMakers_name())).append(",");
-            csv.append(escapeCSV(product.getMakers_job())).append(",");
-            csv.append(escapeCSV(product.getMakers_born())).append("\n");
+            csv.append(escapeCSV(product.getLocation())).append(",");
+            csv.append(escapeCSV(product.getImageUrl())).append("\n");
         }
         
         return csv.toString();
     }
-
+    
     @Override
     public String exportToJSON(ProductQueryDTO queryDTO) {
         List<Product> products = productMapper.findByConditions(queryDTO);
@@ -110,7 +118,23 @@ public class ProductServiceImpl implements IProductService {
             throw new RuntimeException("JSON导出失败", e);
         }
     }
-
+    
+    /**
+     * 处理图片URL
+     */
+    private void processImageUrls(List<Product> products) {
+        for (Product product : products) {
+            if(product.getImageUrl() != null) {
+                String[] address = product.getImageUrl().split(",");
+                product.setImageUrl(address[0]);
+                product.setImageUrl(findImageMapper.findImage(product.getImageUrl()));
+            }
+        }
+    }
+    
+    /**
+     * 转义CSV字段
+     */
     private String escapeCSV(String value) {
         if (value == null) {
             return "";
