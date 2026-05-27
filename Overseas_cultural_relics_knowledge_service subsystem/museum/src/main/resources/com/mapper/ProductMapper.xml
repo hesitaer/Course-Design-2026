@@ -2,6 +2,41 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mapper.ProductMapper">
+    <!-- 基础字段列表 -->
+    <sql id="Base_Column_List">
+        museum_id AS museumId,
+        object_id AS objectId,
+        title,
+        artist,
+        artist_province AS artistProvince,
+        dynasty,
+        artist_wikidata_id AS artistWikidataId,
+        artist_birth AS artistBirth,
+        artist_death AS artistDeath,
+        artist_bio AS artistBio,
+        artist_wikipedia_summary AS artistWikipediaSummary,
+        artist_enriched_at AS artistEnrichedAt,
+        period,
+        period_start_year AS periodStartYear,
+        period_end_year AS periodEndYear,
+        type,
+        material,
+        culture,
+        description,
+        provenance,
+        bibliography,
+        dimensions,
+        museum,
+        location,
+        detail_url AS detailUrl,
+        image_url AS imageUrl,
+        iiif_manifest_url AS iiifManifestUrl,
+        image_path AS imagePath,
+        credit_line AS creditLine,
+        accession_number AS accessionNumber,
+        crawl_date AS crawlDate
+    </sql>
+    
     <!--
         通过复合主键查询文物详情
         表名：cultural_relics_data → artifact
@@ -9,38 +44,83 @@
     -->
     <select id="findByProductId" resultType="com.entity.Product">
         SELECT 
-            museum_id AS museumId,
-            object_id AS objectId,
-            title,
-            artist,
-            artist_province AS artistProvince,
-            dynasty,
-            artist_wikidata_id AS artistWikidataId,
-            artist_birth AS artistBirth,
-            artist_death AS artistDeath,
-            artist_bio AS artistBio,
-            artist_wikipedia_summary AS artistWikipediaSummary,
-            artist_enriched_at AS artistEnrichedAt,
-            period,
-            period_start_year AS periodStartYear,
-            period_end_year AS periodEndYear,
-            type,
-            material,
-            culture,
-            description,
-            provenance,
-            bibliography,
-            dimensions,
-            museum,
-            location,
-            detail_url AS detailUrl,
-            image_url AS imageUrl,
-            iiif_manifest_url AS iiifManifestUrl,
-            image_path AS imagePath,
-            credit_line AS creditLine,
-            accession_number AS accessionNumber,
-            crawl_date AS crawlDate
+        <include refid="Base_Column_List" />
         FROM artifact
         WHERE museum_id = #{museumId} AND object_id = #{objectId}
+    </select>
+    
+    <!-- 公共WHERE条件 -->
+    <sql id="Base_Where_Condition">
+        <where>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (title LIKE CONCAT('%', #{query.keyword}, '%')
+                OR artist LIKE CONCAT('%', #{query.keyword}, '%')
+                OR dynasty LIKE CONCAT('%', #{query.keyword}, '%')
+                OR description LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
+            <if test="query.title != null and query.title != ''">
+                AND title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.artist != null and query.artist != ''">
+                AND artist LIKE CONCAT('%', #{query.artist}, '%')
+            </if>
+            <if test="query.dynasty != null and query.dynasty != ''">
+                AND dynasty = #{query.dynasty}
+            </if>
+            <if test="query.period != null and query.period != ''">
+                AND period LIKE CONCAT('%', #{query.period}, '%')
+            </if>
+            <if test="query.type != null and query.type != ''">
+                AND type = #{query.type}
+            </if>
+            <if test="query.material != null and query.material != ''">
+                AND material = #{query.material}
+            </if>
+            <if test="query.culture != null and query.culture != ''">
+                AND culture = #{query.culture}
+            </if>
+            <if test="query.museum != null and query.museum != ''">
+                AND museum = #{query.museum}
+            </if>
+            <if test="query.museumId != null">
+                AND museum_id = #{query.museumId}
+            </if>
+        </where>
+    </sql>
+    
+    <!-- 多条件查询（不分页） -->
+    <select id="findByConditions" resultType="com.entity.Product">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM artifact
+        <include refid="Base_Where_Condition" />
+    </select>
+    
+    <!-- 多条件查询（分页） -->
+    <select id="findByConditionsWithPage" resultType="com.entity.Product">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM artifact
+        <include refid="Base_Where_Condition" />
+        LIMIT #{offset}, #{limit}
+    </select>
+    
+    <!-- 统计数量 -->
+    <select id="countByConditions" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM artifact
+        <include refid="Base_Where_Condition" />
+    </select>
+    
+    <!-- 关键词搜索 -->
+    <select id="searchByKeyword" resultType="com.entity.Product">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM artifact
+        WHERE title LIKE CONCAT('%', #{keyword}, '%')
+        OR artist LIKE CONCAT('%', #{keyword}, '%')
+        OR dynasty LIKE CONCAT('%', #{keyword}, '%')
+        OR description LIKE CONCAT('%', #{keyword}, '%')
+        LIMIT 50
     </select>
 </mapper>
