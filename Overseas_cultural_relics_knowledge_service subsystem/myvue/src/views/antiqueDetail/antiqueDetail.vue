@@ -133,17 +133,38 @@ export default {
         this.form1 = response.data.data
         console.log(this.form1)
         this.isStared = this.form1.if_collect
+        this.saveBrowseHistory()
       })
         .catch(function (error) {
           console.log(error)
         })
     },
+    saveBrowseHistory () {
+      const history = storage.getItem('browse_history')
+      let list = history ? JSON.parse(history) : []
+      const record = {
+        object_id: this.form1.object_id,
+        museum_id: this.form1.museum_id,
+        object_name: this.form1.object_name,
+        time_period: this.form1.time_period,
+        img_url: this.form1.img_url,
+        browse_time: new Date().toLocaleString('zh-CN')
+      }
+      list = list.filter(item => item.object_id !== record.object_id)
+      list.unshift(record)
+      if (list.length > 50) {
+        list = list.slice(0, 50)
+      }
+      storage.setItem('browse_history', JSON.stringify(list))
+    },
     changeButton () {
-      this.form2.rid = this.$route.query.id
-      this.form2.rid = this.form.rid
-      this.form2.uid = storage.getItem('username')
+      const collectData = {
+        uid: storage.getItem('user_id') || storage.getItem('username'),
+        museumId: this.form1.museum_id,
+        objectId: this.form1.object_id
+      }
       if (this.form1.if_collect === 1) {
-        axios.post('http://localhost:8085/user_admin/deleteCollect', this.form2// 注意数据是直接保存到json对象
+        axios.post('http://localhost:8085/search/searchById/collect', collectData
         ).then((response) => {
           if (response.data.state === 200) {
             this.$message({
@@ -159,7 +180,7 @@ export default {
           console.log(error)
         })
       } else {
-        axios.post('http://localhost:8085/search/searchById/collect', this.form2// 注意数据是直接保存到json对象
+        axios.post('http://localhost:8085/search/searchById/collect', collectData
         ).then((response) => {
           if (response.data.state === 200) {
             this.$message({

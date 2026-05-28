@@ -16,7 +16,7 @@
         <el-form-item label="性别">
           <el-radio v-model="form.sex" :label="1">男</el-radio>
           <el-radio v-model="form.sex" :label="2">女</el-radio>
-          <el-radio v-model="form.sex" :label="0">未知</el-radio>
+          <el-radio v-model="form.sex" :label="0">保密</el-radio>
         </el-form-item>
         <el-form-item label="手机号" prop="tele">
           <el-input type="text" placeholder="请输入手机号" v-model="form.tele"/>

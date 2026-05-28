@@ -28,7 +28,7 @@ public class UserAdminController {
     @Autowired
     private CollectService collectService;
 
-    @RequestMapping("/update")//修改个人资料
+    @RequestMapping("/update")
     public JsonResult<Integer> update(@RequestBody Map map){
         JsonResult<Integer> result = new JsonResult<>();
         try{
@@ -58,7 +58,8 @@ public class UserAdminController {
         }
         return result;
     }
-    @RequestMapping("/comment")//查看评论
+
+    @RequestMapping("/comment")
     public JsonResult<ArrayList<CommentView>> findComment(@RequestBody Map map){
         String userid = (String) map.get("username");
         int user_id = Integer.parseInt(userid);
@@ -69,35 +70,46 @@ public class UserAdminController {
         result.setMessage("以下为评论内容：");
         return result;
     }
-    @RequestMapping("/collect")//查看收藏
+
+    @RequestMapping("/collect")
     public JsonResult<List<CollectView>> findCollect(@RequestBody Map map){
         String userid = (String) map.get("id");
-        int user_id = Integer.parseInt(userid);
+        Long userId = Long.parseLong(userid);
         JsonResult<List<CollectView>> result = new JsonResult<>();
-        List<CollectView> ans = collectService.collectionfromuid(user_id);
+        List<CollectView> ans = collectService.collectionfromuid(userId);
         result.setState(200);
         result.setData(ans);
         result.setMessage("以下为收藏文物：");
         return result;
     }
-    @RequestMapping("/deleteCollect")//取消收藏文物
+
+    @RequestMapping("/deleteCollect")
     public JsonResult<Integer> deleteCollect(@RequestBody Map map){
         JsonResult<Integer> result = new JsonResult<>();
         try{
-            String relicid = (String) map.get("rid");
             String userid = (String) map.get("uid");
-            int relic_id = Integer.parseInt(relicid);
-            int user_id = Integer.parseInt(userid);
-            result.setData(collectService.removecollection(collectService.findByuidandrid(user_id,relic_id).getId()));
+            String museumIdStr = (String) map.get("museumId");
+            String objectId = (String) map.get("objectId");
+
+            Long userId = Long.parseLong(userid);
+            Integer museumId = Integer.parseInt(museumIdStr);
+
+            result.setData(collectService.removecollection(
+                collectService.findByUserIdAndArtifact(userId, museumId, objectId).getFavoriteId()
+            ));
             result.setState(200);
             result.setMessage("取消收藏成功");
         }catch(DeleteLoss e){
             result.setState(4000);
             result.setMessage("收藏文物未找到");
+        } catch(Exception e){
+            result.setState(5000);
+            result.setMessage("取消收藏失败：" + e.getMessage());
         }
         return result;
     }
-    @RequestMapping("/deleteComment")//删除评论
+
+    @RequestMapping("/deleteComment")
     public JsonResult<Integer> deleteComment(@RequestBody Map map){
         JsonResult<Integer> result = new JsonResult<>();
         try{

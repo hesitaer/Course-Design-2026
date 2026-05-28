@@ -13,26 +13,32 @@
         <br>
         <br>
         <el-menu :default-openeds="['1','2']">
-          <el-submenu index="1">
-            <template slot="title"><i class="el-icon-message"></i>用户中心</template>
-            <el-menu-item-group>
-
-              <router-link class="alink" to="/personpage/info"><el-menu-item index="1-1">个人信息</el-menu-item></router-link>
-<!--              <router-link class="alink" to="/personpage/changeimg"><el-menu-item index="1-2">修改头像</el-menu-item></router-link>-->
-              <router-link class="alink" to="/personpage/changeinfo"><el-menu-item index="1-3">修改信息</el-menu-item></router-link>
-            </el-menu-item-group>
-
-          </el-submenu>
-          <router-link class="alink" to="/personpage/favourite">
+          <router-link class="alink" to="/personpage/info">
+            <el-menu-item index="1">
+              <i class="el-icon-user"></i>
+              <span slot="title">个人信息</span>
+            </el-menu-item>
+          </router-link>
+          <router-link class="alink" to="/personpage/changeinfo">
             <el-menu-item index="2">
+              <i class="el-icon-edit"></i>
+              <span slot="title">修改信息</span>
+            </el-menu-item>
+          </router-link>
+          <router-link class="alink" to="/personpage/favourite">
+            <el-menu-item index="3">
               <i class="el-icon-star-on"></i>
-              <span slot="title" >
-                  我的收藏
-              </span>
+              <span slot="title">我的收藏</span>
+            </el-menu-item>
+          </router-link>
+          <router-link class="alink" to="/personpage/browse_history">
+            <el-menu-item index="4">
+              <i class="el-icon-time"></i>
+              <span slot="title">我的足迹</span>
             </el-menu-item>
           </router-link>
           <router-link class="alink" to="/personpage/myComment">
-            <el-menu-item index="3">
+            <el-menu-item index="5">
               <i class="el-icon-document"></i>
               <span slot="title">我的评论</span>
             </el-menu-item>
