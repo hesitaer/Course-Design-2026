@@ -38,7 +38,6 @@ public class ProductServiceImpl implements IProductService {
         if(product.getImageUrl() != null) {
             String[] address = product.getImageUrl().split(",");
             product.setImageUrl(address[0]);
-            product.setImageUrl(findImageMapper.findImage(product.getImageUrl()));
         }
         return product;
     }
@@ -127,7 +126,6 @@ public class ProductServiceImpl implements IProductService {
             if(product.getImageUrl() != null) {
                 String[] address = product.getImageUrl().split(",");
                 product.setImageUrl(address[0]);
-                product.setImageUrl(findImageMapper.findImage(product.getImageUrl()));
             }
         }
     }

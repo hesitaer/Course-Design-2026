@@ -19,4 +19,13 @@ public class ProductQueryDTO {
     private Integer pageSize = 10;    // 每页大小
     private String sortField = "title"; // 排序字段
     private String sortOrder = "asc"; // 排序方向
+
+    public Integer getPageNum() { return pageNum; }
+    public void setPageNum(Integer pageNum) { this.pageNum = pageNum; }
+    public Integer getPageSize() { return pageSize; }
+    public void setPageSize(Integer pageSize) { this.pageSize = pageSize; }
+    public String getSortField() { return sortField; }
+    public void setSortField(String sortField) { this.sortField = sortField; }
+    public String getSortOrder() { return sortOrder; }
+    public void setSortOrder(String sortOrder) { this.sortOrder = sortOrder; }
 }

@@ -43,7 +43,7 @@ public class CartServiceImpl implements ICartService {
             for(int j=0;j<result.size();j++){//访问对应的图片外网
                 Cart p = result.get(j);
                 if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
+                // p.setImg_url(findImageMapper.findImage(p.getImg_url()));
                 result.set(j,p);
             }
             return result;
@@ -63,7 +63,7 @@ public class CartServiceImpl implements ICartService {
             for(int j=0;j<result.size();j++){//访问对应的图片外网
                 Cart p = result.get(j);
                 if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
+                // p.setImg_url(findImageMapper.findImage(p.getImg_url()));
                 result.set(j,p);
             }
             return result;
@@ -84,7 +84,7 @@ public class CartServiceImpl implements ICartService {
             for(int j=0;j<result.size();j++){//访问对应的图片外网
                 Cart p = result.get(j);
                 if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
+                // p.setImg_url(findImageMapper.findImage(p.getImg_url()));
                 result.set(j,p);
             }
             return result;
@@ -104,7 +104,7 @@ public class CartServiceImpl implements ICartService {
             for(int j=0;j<result.size();j++){//访问对应的图片外网
                 Cart p = result.get(j);
                 if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
+                // p.setImg_url(findImageMapper.findImage(p.getImg_url()));
                 result.set(j,p);
             }
             return result;
@@ -178,7 +178,7 @@ public class CartServiceImpl implements ICartService {
             for(int j=0;j<result.size();j++){//访问对应的图片外网
                 Cart p = result.get(j);
                 if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
+                // p.setImg_url(findImageMapper.findImage(p.getImg_url()));
                 result.set(j,p);
             }
             return result;
@@ -203,7 +203,7 @@ public class CartServiceImpl implements ICartService {
             for(int j=0;j<result.size();j++){//访问对应的图片外网
                 Cart p = result.get(j);
                 if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
+                // p.setImg_url(findImageMapper.findImage(p.getImg_url()));
                 result.set(j,p);
             }
             return result;
@@ -225,7 +225,7 @@ public class CartServiceImpl implements ICartService {
                 {
                     String[] address = cart.getImg_url().split(",");
                     cart.setImg_url(address[0]);
-                    cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                    // cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
                 }
                 commentView.add(cart);
                 a1.add(cart.getId());
@@ -246,7 +246,7 @@ public class CartServiceImpl implements ICartService {
                     {
                         String[] address = cart.getImg_url().split(",");
                         cart.setImg_url(address[0]);
-                        cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                        // cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
                     }
                     commentView.add(cart);
                     a1.add(cart.getId());
@@ -267,7 +267,7 @@ public class CartServiceImpl implements ICartService {
                     {
                         String[] address = cart.getImg_url().split(",");
                         cart.setImg_url(address[0]);
-                        cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                        // cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
                     }
                     commentView.add(cart);
                     a1.add(cart.getId());
@@ -292,7 +292,7 @@ public class CartServiceImpl implements ICartService {
                 {
                     String[] address = cart.getImg_url().split(",");
                     cart.setImg_url(address[0]);
-                    cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                    // cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
                 }
                 commentView.add(cart);
                 a1.add(cart.getId());
@@ -312,7 +312,7 @@ public class CartServiceImpl implements ICartService {
                 {
                     String[] address = cart.getImg_url().split(",");
                     cart.setImg_url(address[0]);
-                    cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                    // cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
                 }
                 commentView.add(cart);
                 n--;
