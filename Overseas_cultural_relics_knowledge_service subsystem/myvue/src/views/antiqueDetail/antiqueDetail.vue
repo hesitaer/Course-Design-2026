@@ -952,7 +952,11 @@ export default {
         ? 'http://localhost:8085/user_admin/deleteCollect' 
         : 'http://localhost:8085/search/searchById/collect'
       
-      axios.post(url, this.form)
+      axios.post(url, {
+        uid: this.form.uid,
+        museumId: String(this.museum_id),
+        objectId: String(this.object_id)
+      })
         .then((response) => {
           if (response.data.state === 200) {
             this.isCollected = !this.isCollected
