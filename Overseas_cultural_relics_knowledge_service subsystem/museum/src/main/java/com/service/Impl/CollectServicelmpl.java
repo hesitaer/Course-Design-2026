@@ -5,54 +5,46 @@ import com.entity.CollectView;
 import com.mapper.CollectMapper;
 import com.service.CollectService;
 import com.service.exception.CollectduplicateException;
-import com.service.exception.DeleteException;
 import com.service.exception.DeleteLoss;
-import com.service.exception.InsertException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class CollectServicelmpl implements CollectService {
     @Autowired
     private CollectMapper collectmapper;
+
     @Override
-    public Integer addcollection(Collect collect){
-        Collect result =collectmapper.findByuidandrid(collect.getUid(),collect.getRid());
-        if(result!=null){
+    public Integer addcollection(Collect collect) {
+        Collect result = collectmapper.findByUserIdAndArtifact(
+                collect.getUserId(),
+                collect.getMuseumId(),
+                collect.getObjectId()
+        );
+        if (result != null) {
             throw new CollectduplicateException("请勿重复添加");
         }
-        Integer rows=collectmapper.insert(collect);
-//        if(rows!=1){
-//            throw new InsertException("添加出现未知错误");
-//        }
-        return rows;
+        return collectmapper.insert(collect);
     }
 
     @Override
-    public Integer removecollection(Integer id) {
-        Collect result=collectmapper.findByid(id);
-        if(result==null){
+    public Integer removecollection(Long favoriteId) {
+        Collect result = collectmapper.findById(favoriteId);
+        if (result == null) {
             throw new DeleteLoss("取消收藏信息未找到");
         }
-        Integer rows=collectmapper.delete(id);
-//        if(rows!=1){
-//            throw new DeleteException("取消收藏未知错误");
-//        }
-        return rows;
+        return collectmapper.delete(favoriteId);
     }
 
     @Override
-    public List<CollectView> collectionfromuid(Integer uid) {
-        return collectmapper.findByuid(uid);
+    public List<CollectView> collectionfromuid(Long userId) {
+        return collectmapper.findByUserId(userId);
     }
 
     @Override
-    public Collect findByuidandrid(Integer uid, Integer rid) {
-        Collect result=collectmapper.findByuidandrid(uid,rid);
-//        if(result==null){
-//            throw new DeleteLoss("收藏信息未找到");
-//        }
-        return result;
+    public Collect findByUserIdAndArtifact(Long userId, Integer museumId, String objectId) {
+        return collectmapper.findByUserIdAndArtifact(userId, museumId, objectId);
     }
 }

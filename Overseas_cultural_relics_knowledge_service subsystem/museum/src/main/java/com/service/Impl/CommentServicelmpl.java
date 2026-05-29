@@ -26,7 +26,7 @@ public class CommentServicelmpl implements ICommentService {
     UserMapper userMapper;
     @Override
     public Integer notecomment(Integer uid,Integer rid,String text){
-        int user_comment = userMapper.findByUser_id(uid).getUser_comment();
+        int user_comment = userMapper.findByUser_id(uid.longValue()).getUser_comment();
         if(user_comment==3){
             throw new CommentPermissionException("用户无权限评论");
         }

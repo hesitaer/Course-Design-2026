@@ -5,6 +5,9 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     username: remote_user
     password: '!software2303'
+  web:
+    resources:
+      static-locations: classpath:/static/,file:uploads/
 #neo4j数据库： neo4j还未修改配置
   neo4j:
     uri: neo4j+s://0e2544eb.databases.neo4j.io:7687

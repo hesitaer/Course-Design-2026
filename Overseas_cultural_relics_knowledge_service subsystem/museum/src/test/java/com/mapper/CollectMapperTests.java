@@ -20,13 +20,15 @@ public class CollectMapperTests {
     private CollectMapper collectmapper;
     @Autowired
     private CollectService collectservice;
+
     @Test
     public void addcollection(){
         try
         {
             Collect collect = new Collect();
-            collect.setRid(1);
-            collect.setUid(1);
+            collect.setMuseumId(1);
+            collect.setObjectId("test-object-001");
+            collect.setUserId(1L);
             collectservice.addcollection(collect);
         }
         catch(ServiceException e){
@@ -34,22 +36,28 @@ public class CollectMapperTests {
             System.out.println(e.getMessage());
         }
     }
+
     @Test
     public void delete(){
         try{
-            collectservice.removecollection(1);
+            collectservice.removecollection(1L);
         }
         catch(ServiceException e){
             System.out.println("删除失败！"+e.getClass().getSimpleName());
             System.out.println(e.getMessage());
         }
     }
+
     @Test
     public void view(){
         try{
-            List<CollectView> result=collectservice.collectionfromuid(1);
+            List<CollectView> result=collectservice.collectionfromuid(1L);
             for(int i=0;i<result.size();i++){
-                System.out.println(result.get(i).getId()+" "+result.get(i).getRid()+" "+result.get(i).getUid()+" "+result.get(i).getUsername()+" "+result.get(i).getRelicname());
+                System.out.println(result.get(i).getFavoriteId()+" "+
+                        result.get(i).getObjectId()+" "+
+                        result.get(i).getUserId()+" "+
+                        result.get(i).getUsername()+" "+
+                        result.get(i).getObjectName());
             }
         }
         catch(ServiceException e){
@@ -57,16 +65,18 @@ public class CollectMapperTests {
             System.out.println(e.getMessage());
         }
     }
+
     @Test
     public void test_mapper(){
         Collect collect;
-        collect = collectmapper.findByuidandrid(1,1);
+        collect = collectmapper.findByUserIdAndArtifact(1L, 1, "test-object-001");
         System.out.println(collect.toString());
 
     }
+
     @Test
     public void findByUid_Rid(){
-        Collect collect = collectservice.findByuidandrid(1,1);
+        Collect collect = collectservice.findByUserIdAndArtifact(1L, 1, "test-object-001");
         if(collect==null) System.out.println("未收藏");
         else System.out.println("已收藏");
     }

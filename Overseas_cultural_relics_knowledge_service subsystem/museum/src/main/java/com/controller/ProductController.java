@@ -22,7 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("search")
 public class ProductController extends BaseController {
-    
+
     @Autowired
     private IProductService iProductService;
     @Autowired
@@ -31,7 +31,7 @@ public class ProductController extends BaseController {
     private ICommentService iCommentService;
     @Autowired
     private CollectService collectService;
-    
+
     /**
      * 文物详情页面
      * @param map 包含 museumId, objectId, uid
@@ -41,43 +41,38 @@ public class ProductController extends BaseController {
     public JsonResult<ProductView> findById(@RequestBody Map map){
         JsonResult<ProductView> result = new JsonResult<ProductView>();
         try{
-            // 获取复合主键参数
             String museumIdStr = (String) map.get("museumId");
             String objectId = (String) map.get("objectId");
             String userid = (String) map.get("uid");
-            
+
             int museumId = Integer.parseInt(museumIdStr);
-            
-            // 查询文物详情
+
             Product p = iProductService.findByProductId(museumId, objectId);
             ProductView pp = new ProductView();
             BeanUtils.copyProperties(p, pp);
-            
-            // 获取评论
+
             pp.setCommentView(iCommentService.viewcommentfrelics(museumId));
-            
-            // 获取推荐列表
+
             List<Cart> recommend = new ArrayList<Cart>();
             recommend = iCartService.SearchCommentView(
-                p.getMuseum(), 
-                p.getDynasty(), 
-                p.getArtist(), 
-                p.getCulture(), 
+                p.getMuseum(),
+                p.getDynasty(),
+                p.getArtist(),
+                p.getCulture(),
                 BigInteger.valueOf(museumId)
             );
             pp.setRecommend(recommend);
-            
-            // 检查收藏状态
+
             if(userid != null){
-                int user_id = Integer.parseInt(userid);
-                Collect collect = collectService.findByuidandrid(user_id, museumId);
+                Long userId = Long.parseLong(userid);
+                Collect collect = collectService.findByUserIdAndArtifact(userId, museumId, objectId);
                 if(collect != null) {
                     pp.setIf_collect(1);
                 } else {
                     pp.setIf_collect(0);
                 }
             }
-            
+
             result.setData(pp);
             result.setState(200);
             result.setMessage("找到以下内容：");
@@ -90,7 +85,7 @@ public class ProductController extends BaseController {
         }
         return result;
     }
-    
+
     /**
      * 评论文物
      */
@@ -115,7 +110,7 @@ public class ProductController extends BaseController {
         }
         return result;
     }
-    
+
     /**
      * 收藏文物
      */
@@ -124,17 +119,25 @@ public class ProductController extends BaseController {
         JsonResult<Integer> result = new JsonResult<Integer>();
         try{
             String userid = (String) map.get("uid");
-            String relicid = (String) map.get("rid");
-            int user_id = Integer.parseInt(userid);
-            int relic_id = Integer.parseInt(relicid);
+            String museumIdStr = (String) map.get("museumId");
+            String objectId = (String) map.get("objectId");
+
+            Long userId = Long.parseLong(userid);
+            Integer museumId = Integer.parseInt(museumIdStr);
+
             Collect collect = new Collect();
-            collect.setRid(relic_id);
-            collect.setUid(user_id);
+            collect.setUserId(userId);
+            collect.setMuseumId(museumId);
+            collect.setObjectId(objectId);
+
             result.setData(collectService.addcollection(collect));
             result.setState(200);
             result.setMessage("收藏成功");
         } catch(CollectduplicateException e) {
             result.setMessage("请勿重复收藏！");
+            result.setState(5000);
+        } catch(Exception e) {
+            result.setMessage("收藏失败：" + e.getMessage());
             result.setState(5000);
         }
         return result;

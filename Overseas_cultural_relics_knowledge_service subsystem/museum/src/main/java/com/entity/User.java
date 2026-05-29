@@ -2,83 +2,191 @@ package com.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class User {
-    private int user_id;//用户id
-    private String user_password;//用户密码
-    private String user_name;//用户名
-    private int user_sex;//用户性别
-    private String user_tel;//电话
-    private int user_comment = 0;//评论权限
-    private int user_login = 1;//用户登录权限
+    private Long user_id;          // 用户唯一标识ID
+    private String username;       // 用户名
+    private String user_source;    // 注册来源：web / app
+    private String nickname;       // 展示昵称
+    private String avatar_url;     // 头像URL
+    private Integer sex;           // 性别：0未知1男2女
+    private String password;       // 密码（加密存储）
+    private String email;          // 邮箱
+    private String phone;          // 手机号
+    private Date register_time;    // 注册时间
+    private Date last_login_at;    // 最近登录时间
+    private String last_login_ip;  // 最近登录IP
+    private Integer status;        // 1正常0禁用
+    private String disabled_reason;// 禁用原因
+    private Long disabled_by;      // 禁用操作管理员ID
+    private Date disabled_at;      // 禁用时间
+    private Date created_at;       // 记录创建时间
+    private Date updated_at;       // 信息更新时间
+    private Integer user_comment;  // 评论权限（保留原有字段）
+    private Integer user_login;    // 用户登录权限（保留原有字段）
 
     public User() {
-
     }
 
-    public User(int user_id, String user_password, String user_name, int user_sex, String user_tel, int user_comment, int user_login) {
-        this.user_id = user_id;
-        this.user_password = user_password;
-        this.user_name = user_name;
-        this.user_sex = user_sex;
-        this.user_tel = user_tel;
-        this.user_comment = user_comment;
-        this.user_login = user_login;
-    }
-
-    public int getUser_id() {
+    public Long getUser_id() {
         return user_id;
     }
 
-    public void setUser_id(int user_id) {
+    public void setUser_id(Long user_id) {
         this.user_id = user_id;
     }
 
-    public String getUser_password() {
-        return user_password;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser_password(String user_password) {
-        this.user_password = user_password;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getUser_name() {
-        return user_name;
+    public String getUser_source() {
+        return user_source;
     }
 
-    public void setUser_name(String user_name) {
-        this.user_name = user_name;
+    public void setUser_source(String user_source) {
+        this.user_source = user_source;
     }
 
-    public int getUser_sex() {
-        return user_sex;
+    public String getNickname() {
+        return nickname;
     }
 
-    public void setUser_sex(int user_sex) {
-        this.user_sex = user_sex;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
-    public String getUser_tel() {
-        return user_tel;
+    public String getAvatar_url() {
+        return avatar_url;
     }
 
-    public void setUser_tel(String user_tel) {
-        this.user_tel = user_tel;
+    public void setAvatar_url(String avatar_url) {
+        this.avatar_url = avatar_url;
     }
 
-    public int getUser_comment() {
+    public Integer getSex() {
+        return sex;
+    }
+
+    public void setSex(Integer sex) {
+        this.sex = sex;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public Date getRegister_time() {
+        return register_time;
+    }
+
+    public void setRegister_time(Date register_time) {
+        this.register_time = register_time;
+    }
+
+    public Date getLast_login_at() {
+        return last_login_at;
+    }
+
+    public void setLast_login_at(Date last_login_at) {
+        this.last_login_at = last_login_at;
+    }
+
+    public String getLast_login_ip() {
+        return last_login_ip;
+    }
+
+    public void setLast_login_ip(String last_login_ip) {
+        this.last_login_ip = last_login_ip;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public String getDisabled_reason() {
+        return disabled_reason;
+    }
+
+    public void setDisabled_reason(String disabled_reason) {
+        this.disabled_reason = disabled_reason;
+    }
+
+    public Long getDisabled_by() {
+        return disabled_by;
+    }
+
+    public void setDisabled_by(Long disabled_by) {
+        this.disabled_by = disabled_by;
+    }
+
+    public Date getDisabled_at() {
+        return disabled_at;
+    }
+
+    public void setDisabled_at(Date disabled_at) {
+        this.disabled_at = disabled_at;
+    }
+
+    public Date getCreated_at() {
+        return created_at;
+    }
+
+    public void setCreated_at(Date created_at) {
+        this.created_at = created_at;
+    }
+
+    public Date getUpdated_at() {
+        return updated_at;
+    }
+
+    public void setUpdated_at(Date updated_at) {
+        this.updated_at = updated_at;
+    }
+
+    public Integer getUser_comment() {
         return user_comment;
     }
 
-    public void setUser_comment(int user_comment) {
+    public void setUser_comment(Integer user_comment) {
         this.user_comment = user_comment;
     }
 
-    public int getUser_login() {
+    public Integer getUser_login() {
         return user_login;
     }
 
-    public void setUser_login(int user_login) {
+    public void setUser_login(Integer user_login) {
         this.user_login = user_login;
     }
 
@@ -86,10 +194,23 @@ public class User {
     public String toString() {
         return "User{" +
                 "user_id=" + user_id +
-                ", user_password='" + user_password + '\'' +
-                ", user_name='" + user_name + '\'' +
-                ", user_sex=" + user_sex +
-                ", user_tel='" + user_tel + '\'' +
+                ", username='" + username + '\'' +
+                ", user_source='" + user_source + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", avatar_url='" + avatar_url + '\'' +
+                ", sex=" + sex +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", register_time=" + register_time +
+                ", last_login_at=" + last_login_at +
+                ", last_login_ip='" + last_login_ip + '\'' +
+                ", status=" + status +
+                ", disabled_reason='" + disabled_reason + '\'' +
+                ", disabled_by=" + disabled_by +
+                ", disabled_at=" + disabled_at +
+                ", created_at=" + created_at +
+                ", updated_at=" + updated_at +
                 ", user_comment=" + user_comment +
                 ", user_login=" + user_login +
                 '}';
