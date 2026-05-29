@@ -60,6 +60,16 @@ const routes = [
     component: () => import('../views/fore/classify_usea.vue')
   },
   {
+    path: '/antiqueList',
+    name: 'antiqueList',
+    component: () => import('../views/fore/AntiqueListDemo.vue')
+  },
+  {
+    path: '/antiqueCompare',
+    name: 'antiqueCompare',
+    component: () => import('../views/fore/AntiqueCompare.vue')
+  },
+  {
     path: '/pro_search',
     name: 'search_det',
     component: () => import('../views/fore/search_bar.vue')

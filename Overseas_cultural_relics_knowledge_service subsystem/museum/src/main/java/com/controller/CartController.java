@@ -52,6 +52,10 @@ public class CartController {
         }catch (SecurityException e){
             result.setState(6000);
             result.setMessage("未知查询错误，请联系管理员！");
+        }catch (Exception e){
+            result.setState(5000);
+            result.setMessage("服务器内部错误: " + e.getMessage());
+            e.printStackTrace();
         }
         return result;
     }

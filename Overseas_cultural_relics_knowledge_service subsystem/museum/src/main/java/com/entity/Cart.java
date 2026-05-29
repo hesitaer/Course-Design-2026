@@ -1,96 +1,129 @@
 package com.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.math.BigInteger;
+import java.util.Date;
+
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Cart {
+    @JsonProperty("id")
     private BigInteger id;
-    private String object_name;//文物姓名
-    private String cat1;//材质
-    private String cat2;//朝代
-    private String cat3;//分类
-    private String makers_name;//作者姓名
-    private String img_url = null;
+    @JsonProperty("object_name")
+    private String object_name;
+    @JsonProperty("title")
+    private String title;
+    @JsonProperty("dynasty")
+    private String dynasty;
+    @JsonProperty("period")
+    private String period;
+    @JsonProperty("period_start_year")
+    private Short period_start_year;
+    @JsonProperty("type")
+    private String type;
+    @JsonProperty("material")
+    private String material;
+    @JsonProperty("museum")
+    private String museum;
+    @JsonProperty("location")
+    private String location;
+    @JsonProperty("culture")
+    private String culture;
+    @JsonProperty("artist")
+    private String artist;
+    @JsonProperty("description")
+    private String description;
+    @JsonProperty("dimensions")
+    private String dimensions;
+    @JsonProperty("credit_line")
+    private String credit_line;
+    @JsonProperty("accession_number")
+    private String accession_number;
+    @JsonProperty("image_url")
+    private String image_url;
+    @JsonProperty("detail_url")
+    private String detail_url;
+    @JsonProperty("image_path")
+    private String image_path;
+    @JsonProperty("iiif_manifest_url")
+    private String iiif_manifest_url;
+    @JsonProperty("crawl_date")
+    private Date crawl_date;
+    @JsonProperty("provenance")
+    private String provenance;
+    @JsonProperty("bibliography")
+    private String bibliography;
+    @JsonProperty("object_id")
+    private String object_id;
+    @JsonProperty("museum_id")
+    private Integer museum_id;
+    @JsonProperty("artist_wikidata_id")
+    private String artist_wikidata_id;
+    @JsonProperty("artist_birth")
+    private String artist_birth;
+    @JsonProperty("artist_death")
+    private String artist_death;
+    @JsonProperty("artist_bio")
+    private String artist_bio;
+    @JsonProperty("artist_wikipedia_summary")
+    private String artist_wikipedia_summary;
+    @JsonProperty("artist_enriched_at")
+    private String artist_enriched_at;
+    @JsonProperty("period_end_year")
+    private Short period_end_year;
+    @JsonProperty("artist_province")
+    private String artist_province;
+    
+    // 向后兼容的字段
+    @JsonProperty("cat1")
+    private String cat1;
+    @JsonProperty("cat2")
+    private String cat2;
+    @JsonProperty("cat3")
+    private String cat3;
+    @JsonProperty("makers_name")
+    private String makers_name;
+    @JsonProperty("img_url")
+    private String img_url;
+    
     public Cart() {
     }
 
-    public Cart(BigInteger id, String object_name, String cat1, String cat2, String cat3, String makers_name, String img_url) {
-        this.id = id;
-        this.object_name = object_name;
-        this.cat1 = cat1;
-        this.cat2 = cat2;
-        this.cat3 = cat3;
-        this.makers_name = makers_name;
-        this.img_url = img_url;
-    }
-
+    // 手动添加的 getter/setter 方法
     public BigInteger getId() {
-        return id;
+        return this.id;
     }
-
+    
     public void setId(BigInteger id) {
         this.id = id;
     }
-
-    public String getObject_name() {
-        return object_name;
-    }
-
-    public void setObject_name(String object_name) {
-        this.object_name = object_name;
-    }
-
-    public String getCat1() {
-        return cat1;
-    }
-
-    public void setCat1(String cat1) {
-        this.cat1 = cat1;
-    }
-
-    public String getCat2() {
-        return cat2;
-    }
-
-    public void setCat2(String cat2) {
-        this.cat2 = cat2;
-    }
-
-    public String getCat3() {
-        return cat3;
-    }
-
-    public void setCat3(String cat3) {
-        this.cat3 = cat3;
-    }
-
-    public String getMakers_name() {
-        return makers_name;
-    }
-
-    public void setMakers_name(String makers_name) {
-        this.makers_name = makers_name;
-    }
-
+    
     public String getImg_url() {
-        return img_url;
+        return this.img_url;
     }
-
+    
     public void setImg_url(String img_url) {
         this.img_url = img_url;
+    }
+    
+    public String getMakers_name() {
+        return this.makers_name;
+    }
+    
+    public void setMakers_name(String makers_name) {
+        this.makers_name = makers_name;
     }
 
     @Override
     public String toString() {
         return "Cart{" +
                 "id=" + id +
-                ", object_name='" + object_name + '\'' +
-                ", cat1='" + cat1 + '\'' +
-                ", cat2='" + cat2 + '\'' +
-                ", cat3='" + cat3 + '\'' +
-                ", makers_name='" + makers_name + '\'' +
-                ", img_url='" + img_url + '\'' +
+                ", title='" + title + '\'' +
+                ", dynasty='" + dynasty + '\'' +
+                ", museum='" + museum + '\'' +
                 '}' + "\n";
     }
 }
