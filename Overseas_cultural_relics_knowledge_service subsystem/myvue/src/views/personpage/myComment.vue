@@ -16,7 +16,7 @@
         <div class="comment-content">{{ comment.content }}</div>
         <div class="comment-footer">
           <el-button
-            size="mini"
+            size="small"
             type="danger"
             @click="handleDelete(comment)"
           >

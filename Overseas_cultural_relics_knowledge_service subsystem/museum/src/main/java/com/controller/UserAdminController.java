@@ -117,11 +117,16 @@ public class UserAdminController {
     public JsonResult<Integer> deleteComment(@RequestBody Map map) {
         JsonResult<Integer> result = new JsonResult<>();
         try {
-            String commentIdStr = (String) map.get("commentId");
-            if (commentIdStr == null || commentIdStr.isEmpty()) {
-                commentIdStr = (String) map.get("cid");
+            Long commentId;
+            Object commentIdObj = map.get("commentId");
+            if (commentIdObj == null) {
+                commentIdObj = map.get("cid");
             }
-            Long commentId = Long.parseLong(commentIdStr);
+            if (commentIdObj instanceof Integer) {
+                commentId = ((Integer) commentIdObj).longValue();
+            } else {
+                commentId = Long.parseLong((String) commentIdObj);
+            }
             iCommentService.softDeleteComment(commentId);
             result.setData(1);
             result.setMessage("删除评论成功");
@@ -132,6 +137,9 @@ public class UserAdminController {
         } catch (DeleteException e) {
             result.setState(6000);
             result.setMessage("删除评论失败");
+        } catch (Exception e) {
+            result.setState(5000);
+            result.setMessage("删除评论失败：" + e.getMessage());
         }
         return result;
     }

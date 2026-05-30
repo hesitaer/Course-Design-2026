@@ -86,7 +86,7 @@
         FROM comment c
         LEFT JOIN user u ON c.user_id = u.user_id
         LEFT JOIN artifact a ON c.museum_id = a.museum_id AND c.object_id = a.object_id
-        WHERE c.user_id = #{userId}
+        WHERE c.user_id = #{userId} AND c.status = 1
         ORDER BY c.created_at DESC
     </select>
 
