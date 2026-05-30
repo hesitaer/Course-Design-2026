@@ -50,7 +50,7 @@
             u.username,
             a.title as object_name,
             a.period as time_period,
-            a.image_path as img_url
+            a.image_url as img_url
         FROM user_favorite uf
         LEFT JOIN user u ON uf.user_id = u.user_id
         LEFT JOIN artifact a ON uf.museum_id = a.museum_id AND uf.object_id = a.object_id

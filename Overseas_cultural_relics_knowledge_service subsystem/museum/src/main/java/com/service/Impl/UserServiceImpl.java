@@ -126,11 +126,11 @@ public class UserServiceImpl implements IUserService {
         user.setUser_id(user_id);
         user.setPassword(password != null && !password.isEmpty() ? getMd5Password(password, salt) : existingUser.getPassword());
         user.setUsername(username);
-        user.setNickname(nickname);
-        user.setSex(sex);
-        user.setEmail(email);
-        user.setPhone(phone);
-        user.setAvatar_url(avatar_url);
+        user.setNickname(nickname != null && !nickname.isEmpty() ? nickname : existingUser.getNickname());
+        user.setSex(sex != null ? sex : existingUser.getSex());
+        user.setEmail(email != null && !email.isEmpty() ? email : existingUser.getEmail());
+        user.setPhone(phone != null && !phone.isEmpty() ? phone : existingUser.getPhone());
+        user.setAvatar_url(avatar_url != null && !avatar_url.isEmpty() ? avatar_url : existingUser.getAvatar_url());
 
         int row = userMapper.update(user);
         if(row != 0) {

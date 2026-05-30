@@ -387,7 +387,7 @@ export default {
   methods: {
     // 页面初始化
     pageInit () {
-      this.form.uid = window.localStorage.getItem('username')
+      this.form.uid = window.localStorage.getItem('user_id') || window.localStorage.getItem('username')
       
       // 获取URL参数
       this.museum_id = this.$route.query.museum_id
@@ -400,6 +400,8 @@ export default {
         this.loadComments()
         this.loadKnowledgeGraph()
         this.loadRelatedArtifacts()
+        // 添加浏览记录
+        this.addBrowseHistory()
       })
     },
     
@@ -410,7 +412,8 @@ export default {
         if (this.museum_id && this.object_id) {
           axios.post('http://localhost:8085/search/detail', { 
             museumId: parseInt(this.museum_id), 
-            objectId: String(this.object_id) 
+            objectId: String(this.object_id),
+            uid: this.form.uid
           })
             .then((response) => {
               if (response.data.state === 200) {
@@ -967,6 +970,47 @@ export default {
           console.log(error)
           this.$message.error('操作失败')
         })
+        .finally(() => {
+          // 通知其他页面收藏状态变化
+          window.dispatchEvent(new Event('collectChange'))
+        })
+    },
+    
+    // 添加浏览记录
+    addBrowseHistory () {
+      if (!this.artifact || (!this.artifact.object_id && !this.artifact.objectId)) return
+      
+      const historyItem = {
+        object_id: this.artifact.object_id || this.artifact.objectId,
+        museum_id: this.museum_id,
+        object_name: this.artifact.object_name || this.artifact.title,
+        time_period: this.artifact.time_period || this.artifact.period,
+        img_url: this.artifact.image_url || this.artifact.imageUrl || this.artifact.img_url,
+        browse_time: new Date().toLocaleString('zh-CN')
+      }
+      
+      const history = localStorage.getItem('browse_history')
+      let historyList = []
+      if (history) {
+        try {
+          historyList = JSON.parse(history)
+        } catch (e) {
+          historyList = []
+        }
+      }
+      
+      // 移除重复记录
+      historyList = historyList.filter(item => !(item.object_id === historyItem.object_id && item.museum_id === historyItem.museum_id))
+      
+      // 添加到开头
+      historyList.unshift(historyItem)
+      
+      // 最多保留50条记录
+      if (historyList.length > 50) {
+        historyList = historyList.slice(0, 50)
+      }
+      
+      localStorage.setItem('browse_history', JSON.stringify(historyList))
     },
     
     // 分享功能

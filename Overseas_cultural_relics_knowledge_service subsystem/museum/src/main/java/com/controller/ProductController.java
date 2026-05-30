@@ -341,14 +341,30 @@ public class ProductController extends BaseController {
      * 获取文物详情（简化版，用于列表展示）
      */
     @RequestMapping("/detail")
-    public JsonResult<Product> getArtifactDetail(@RequestBody Map<String, Object> params) {
-        JsonResult<Product> result = new JsonResult<Product>();
+    public JsonResult<ProductView> getArtifactDetail(@RequestBody Map<String, Object> params) {
+        JsonResult<ProductView> result = new JsonResult<ProductView>();
         try{
             Integer museumId = (Integer) params.get("museumId");
             String objectId = (String) params.get("objectId");
+            String userid = (String) params.get("uid");
             
             Product artifact = iProductService.findByProductId(museumId, objectId);
-            result.setData(artifact);
+            ProductView pv = new ProductView();
+            BeanUtils.copyProperties(artifact, pv);
+            
+            if(userid != null && !userid.isEmpty()){
+                Long userId = Long.parseLong(userid);
+                Collect collect = collectService.findByUserIdAndArtifact(userId, museumId, objectId);
+                if(collect != null) {
+                    pv.setIf_collect(1);
+                } else {
+                    pv.setIf_collect(0);
+                }
+            } else {
+                pv.setIf_collect(0);
+            }
+            
+            result.setData(pv);
             result.setState(200);
             result.setMessage("查询成功");
         } catch(ProductNotFoundException e) {
