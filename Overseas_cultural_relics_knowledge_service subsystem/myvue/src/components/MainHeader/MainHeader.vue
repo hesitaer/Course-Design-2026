@@ -16,6 +16,25 @@
           <el-menu-item class="disable-element-hover" index="classify">浏览</el-menu-item>
         </div>
       </router-link>
+      
+      <router-link to="/knowledge-graph">
+        <div class="float-left">
+          <el-menu-item class="disable-element-hover" index="knowledge-graph">知识图谱</el-menu-item>
+        </div>
+      </router-link>
+
+      <router-link to="/timeline">
+        <div class="float-left">
+          <el-menu-item class="disable-element-hover" index="timeline">文物时间轴</el-menu-item>
+        </div>
+      </router-link>
+
+      <router-link to="/statistics">
+        <div class="float-left">
+          <el-menu-item class="disable-element-hover" index="statistics">统计分析</el-menu-item>
+        </div>
+      </router-link>
+      
       <router-link to="/keyword">
         <div class="float-left">
           <el-menu-item class="disable-element-hover" index="keyword">关键字</el-menu-item>

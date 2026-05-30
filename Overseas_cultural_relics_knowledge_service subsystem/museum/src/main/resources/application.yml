@@ -5,13 +5,11 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     username: remote_user
     password: '!software2303'
-#neo4j数据库： neo4j还未修改配置
   neo4j:
-    uri: neo4j+s://0e2544eb.databases.neo4j.io:7687
+    uri: bolt://10.4.17.244:7687
     authentication:
       username: neo4j
-      password: ChhPfOMH7cPmszEgGQPv56FlZt_CIOTQRfKwOz0rXmE
-
+      password: password123
 
 mybatis:
   mapper-locations: classpath*:com/mapper/*.xml
