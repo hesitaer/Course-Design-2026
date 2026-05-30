@@ -3,51 +3,109 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mapper.CommentMapper">
     <resultMap id="CommentEntityMap" type="com.entity.Comment">
-        <id column="user_comment_id" property="cid"/><result column="user_id" property="uid"/><result column="relic_id" property="rid"/> <result column="content" property="content"/><result column="user_comment" property="user_comment"/>  <result column="created_time" property="createdTime"/>
+        <id column="comment_id" property="commentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="museum_id" property="museumId"/>
+        <result column="object_id" property="objectId"/>
+        <result column="content" property="content"/>
+        <result column="source" property="source"/>
+        <result column="audit_method" property="auditMethod"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="auto_audit_status" property="autoAuditStatus"/>
+        <result column="sensitive_words_hit" property="sensitiveWordsHit"/>
+        <result column="auditor_id" property="auditorId"/>
+        <result column="status" property="status"/>
+        <result column="deleted_by" property="deletedBy"/>
+        <result column="delete_reason" property="deleteReason"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
     </resultMap>
-    <insert id="insert" useGeneratedKeys="true" keyProperty="cid">
-        INSERT INTO
-            comment(user_id,relic_id,content,user_comment,created_time,modified_time) VALUES (#{uid}, #{rid}, #{content}, #{user_comment}, #{createdTime},  #{modifiedTime})
+
+    <resultMap id="CommentViewMap" type="com.entity.CommentView">
+        <id column="comment_id" property="commentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="museum_id" property="museumId"/>
+        <result column="object_id" property="objectId"/>
+        <result column="username" property="username"/>
+        <result column="object_name" property="objectName"/>
+        <result column="content" property="content"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="commentId">
+        INSERT INTO comment(user_id, museum_id, object_id, content, source, audit_method, audit_status, status)
+        VALUES (#{userId}, #{museumId}, #{objectId}, #{content}, #{source}, #{auditMethod}, #{auditStatus}, #{status})
     </insert>
+
+    <update id="softDelete">
+        UPDATE comment SET status = 0, updated_at = CURRENT_TIMESTAMP WHERE comment_id = #{commentId}
+    </update>
+
     <delete id="delete">
-        DELETE FROM comment_check WHERE user_comment_id=#{cid}
+        DELETE FROM comment WHERE comment_id = #{commentId}
     </delete>
-    <select id="findByUidandRid" resultType="com.entity.CommentView">
-        SELECT
-        comment_check.user_comment_id as cid,
-        comment_check.user_id as uid,
-        comment_check.relic_id as rid,
-        user.user_name as username,
-        cultural_relics_data.object_name as relicname,
-        comment_check.content as content,
-        comment_check.created_time as created_time
-        FROM comment_check,user,cultural_relics_data WHERE comment_check.user_id=#{uid} and comment_check.relic_id=#{rid} and comment_check.user_id=user.user_id and comment_check.relic_id=cultural_relics_data.id
-    </select>
-    <select id="findByUid" resultType="com.entity.CommentView">
-        SELECT
-            comment_check.user_comment_id as cid,
-            comment_check.user_id as uid,
-            comment_check.relic_id as rid,
-            user.user_name as username,
-            cultural_relics_data.object_name as relicname,
-            comment_check.content as content,
-            comment_check.created_time as created_time
-        FROM comment_check,user,cultural_relics_data WHERE comment_check.user_id=#{uid}  and comment_check.user_id=user.user_id and comment_check.relic_id=cultural_relics_data.id
 
-    </select>
-    <select id="findByRid" resultType="com.entity.CommentView">
-        SELECT
-            comment_check.user_comment_id as cid,
-            comment_check.user_id as uid,
-            comment_check.relic_id as rid,
-            user.user_name as username,
-            cultural_relics_data.object_name as relicname,
-            comment_check.content as content,
-            comment_check.created_time as created_time
-        FROM comment_check,user,cultural_relics_data WHERE comment_check.relic_id= #{rid}  and comment_check.user_id=user.user_id and comment_check.relic_id=cultural_relics_data.id
-    </select>
-    <select id="findBycid" resultMap="CommentEntityMap">
-        SELECT * FROM comment_check WHERE user_comment_id=#{cid}
+    <select id="findByCid" resultMap="CommentEntityMap">
+        SELECT * FROM comment WHERE comment_id = #{commentId}
     </select>
 
+    <select id="findByArtifact" resultMap="CommentViewMap">
+        SELECT
+            c.comment_id,
+            c.user_id,
+            c.museum_id,
+            c.object_id,
+            u.username,
+            a.title as object_name,
+            c.content,
+            c.audit_status,
+            c.status,
+            c.created_at
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.user_id
+        LEFT JOIN artifact a ON c.museum_id = a.museum_id AND c.object_id = a.object_id
+        WHERE c.museum_id = #{museumId} AND c.object_id = #{objectId}
+          AND c.audit_status = 1 AND c.status = 1
+        ORDER BY c.created_at DESC
+    </select>
+
+    <select id="findByUserId" resultMap="CommentViewMap">
+        SELECT
+            c.comment_id,
+            c.user_id,
+            c.museum_id,
+            c.object_id,
+            u.username,
+            a.title as object_name,
+            c.content,
+            c.audit_status,
+            c.status,
+            c.created_at
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.user_id
+        LEFT JOIN artifact a ON c.museum_id = a.museum_id AND c.object_id = a.object_id
+        WHERE c.user_id = #{userId}
+        ORDER BY c.created_at DESC
+    </select>
+
+    <select id="findByUserIdAndArtifact" resultMap="CommentViewMap">
+        SELECT
+            c.comment_id,
+            c.user_id,
+            c.museum_id,
+            c.object_id,
+            u.username,
+            a.title as object_name,
+            c.content,
+            c.audit_status,
+            c.status,
+            c.created_at
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.user_id
+        LEFT JOIN artifact a ON c.museum_id = a.museum_id AND c.object_id = a.object_id
+        WHERE c.user_id = #{userId} AND c.museum_id = #{museumId} AND c.object_id = #{objectId}
+        ORDER BY c.created_at DESC
+    </select>
 </mapper>

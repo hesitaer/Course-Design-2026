@@ -18,44 +18,48 @@ public class CommentMapperTests {
     private CommentMapper commentMapper;
     @Autowired
     private ICommentService icommentservice;
+    
     @Test
     public void insert(){
         Comment comment = new Comment();
-        comment.setUid(1);
-        comment.setRid(10);
+        comment.setUserId(1L);
+        comment.setMuseumId(1);
+        comment.setObjectId("test001");
         comment.setContent("6666ya");
-        comment.setUser_comment(0);
         commentMapper.insert(comment);
     }
+    
     @Test
     public void findByUidandRid(){
         List<CommentView> result;
-        result=commentMapper.findByUidandRid(1,1);
+        result = commentMapper.findByUserIdAndArtifact(1L, 1, "test001");
         for(int i=0;i<result.size();i++)
-            System.out.println(result.get(i).getUsername()+"  "+result.get(i).getRelicname()+" "+result.get(i).getContent()+" "+result.get(i).getCreated_time());
+            System.out.println(result.get(i).getUsername()+"  "+result.get(i).getObjectName()+" "+result.get(i).getContent()+" "+result.get(i).getCreatedAt());
     }
+    
     @Test
     public void find(){
         List<CommentView> result;
-        result=commentMapper.findByRid(1);
+        result = commentMapper.findByArtifact(1, "test001");
         for(int i=0;i<result.size();i++)
-            System.out.println(result.get(i).getCid());
-        result=commentMapper.findByUid(1);
+            System.out.println(result.get(i).getCommentId());
+        result = commentMapper.findByUserId(1L);
         for(int i=0;i<result.size();i++)
-            System.out.println(result.get(i).getCid());
+            System.out.println(result.get(i).getCommentId());
     }
+    
     @Test
     public void find_by_cid(){
         Comment comment;
-        comment = commentMapper.findBycid(1);
-        System.out.println(comment.toString()+ comment.getCreatedTime() + comment.getModifiedTime());
-
+        comment = commentMapper.findByCid(1L);
+        System.out.println(comment.toString()+ comment.getCreatedAt() + comment.getUpdatedAt());
     }
+    
     @Test
     public void view(){
-        ArrayList<CommentView> r1=icommentservice.viewcommentfrelics(1);
-        ArrayList<CommentView> r2 =icommentservice.viewcommentfuar(1,1);
-        ArrayList<CommentView> r3=icommentservice.viewcommentfuser(1);
+        ArrayList<CommentView> r1 = (ArrayList<CommentView>) icommentservice.getCommentsByArtifact(1, "test001");
+        ArrayList<CommentView> r2 = (ArrayList<CommentView>) icommentservice.getCommentsByUserAndArtifact(1L, 1, "test001");
+        ArrayList<CommentView> r3 = (ArrayList<CommentView>) icommentservice.getCommentsByUser(1L);
         for(int i=0;i<r1.size();i++){
             System.out.println(r1.get(i).getContent());
         }
@@ -66,10 +70,10 @@ public class CommentMapperTests {
             System.out.println(r3.get(i).getContent());
         }
     }
+    
     @Test
     public void delete(){
-        Integer row = 0;
-        row = icommentservice.deletecomment(4);
-        System.out.println(row);
+        icommentservice.softDeleteComment(4L);
+        System.out.println("delete success");
     }
 }

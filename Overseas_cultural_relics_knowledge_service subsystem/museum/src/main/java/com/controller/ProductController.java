@@ -51,7 +51,7 @@ public class ProductController extends BaseController {
             ProductView pp = new ProductView();
             BeanUtils.copyProperties(p, pp);
 
-            pp.setCommentView(iCommentService.viewcommentfrelics(museumId));
+            pp.setCommentView((ArrayList<CommentView>) iCommentService.getCommentsByArtifact(museumId, objectId));
 
             List<Cart> recommend = new ArrayList<Cart>();
             recommend = iCartService.SearchCommentView(
@@ -94,11 +94,15 @@ public class ProductController extends BaseController {
         JsonResult<Integer> result = new JsonResult<Integer>();
         try{
             String userid = (String) map.get("uid");
-            String relicid = (String) map.get("rid");
+            String museumIdStr = (String) map.get("museumId");
+            String objectId = (String) map.get("objectId");
             String content = (String) map.get("content");
-            int user_id = Integer.parseInt(userid);
-            int relic_id = Integer.parseInt(relicid);
-            result.setData(iCommentService.notecomment(user_id, relic_id, content));
+            
+            Long userId = Long.parseLong(userid);
+            Integer museumId = Integer.parseInt(museumIdStr);
+            
+            iCommentService.addComment(userId, museumId, objectId, content);
+            result.setData(1);
             result.setState(200);
             result.setMessage("评论成功");
         } catch(CommentPermissionException e) {
@@ -150,9 +154,11 @@ public class ProductController extends BaseController {
     public JsonResult<ArrayList<CommentView>> getCommentList(@RequestBody Map map) {
         JsonResult<ArrayList<CommentView>> result = new JsonResult<ArrayList<CommentView>>();
         try{
-            String relicid = (String) map.get("rid");
-            int relic_id = Integer.parseInt(relicid);
-            ArrayList<CommentView> comments = iCommentService.viewcommentfrelics(relic_id);
+            String museumIdStr = (String) map.get("museumId");
+            String objectId = (String) map.get("objectId");
+            
+            Integer museumId = Integer.parseInt(museumIdStr);
+            ArrayList<CommentView> comments = (ArrayList<CommentView>) iCommentService.getCommentsByArtifact(museumId, objectId);
             result.setData(comments);
             result.setState(200);
             result.setMessage("获取评论成功");
@@ -372,6 +378,55 @@ public class ProductController extends BaseController {
             result.setMessage("文物不存在");
         } catch(Exception e) {
             result.setMessage("查询失败：" + e.getMessage());
+            result.setState(6000);
+        }
+        return result;
+    }
+
+    /**
+     * 获取文物的评论列表
+     */
+    @RequestMapping("/getComments")
+    public JsonResult<List<CommentView>> getComments(@RequestBody Map<String, Object> params) {
+        JsonResult<List<CommentView>> result = new JsonResult<>();
+        try {
+            Integer museumId = (Integer) params.get("museumId");
+            String objectId = (String) params.get("objectId");
+            
+            List<CommentView> comments = iCommentService.getCommentsByArtifact(museumId, objectId);
+            result.setData(comments);
+            result.setState(200);
+            result.setMessage("获取评论成功");
+        } catch (Exception e) {
+            result.setMessage("获取评论失败：" + e.getMessage());
+            result.setState(6000);
+        }
+        return result;
+    }
+
+    /**
+     * 添加评论
+     */
+    @RequestMapping("/addComment")
+    public JsonResult<Long> addComment(@RequestBody Map<String, Object> params) {
+        JsonResult<Long> result = new JsonResult<>();
+        try {
+            String userIdStr = (String) params.get("userId");
+            Integer museumId = (Integer) params.get("museumId");
+            String objectId = (String) params.get("objectId");
+            String content = (String) params.get("content");
+            
+            Long userId = Long.parseLong(userIdStr);
+            Long commentId = iCommentService.addComment(userId, museumId, objectId, content);
+            
+            result.setData(commentId);
+            result.setState(200);
+            result.setMessage("评论成功，等待审核");
+        } catch (InsertException e) {
+            result.setState(5000);
+            result.setMessage("评论失败");
+        } catch (Exception e) {
+            result.setMessage("评论失败：" + e.getMessage());
             result.setState(6000);
         }
         return result;

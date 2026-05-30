@@ -239,21 +239,26 @@
         <!-- 评论区域 -->
         <div class="comment-section">
           <el-card class="comment-card">
-            <h3 class="section-title">评论</h3>
+            <h3 class="section-title">
+              <i class="el-icon-chat-dot-round"></i>
+              评论 ({{ comments.length }})
+            </h3>
             <div class="comment-list">
               <div 
-                v-for="(comment, index) in comments" 
-                :key="index"
+                v-for="comment in comments" 
+                :key="comment.commentId"
                 class="comment-item"
               >
                 <div class="comment-header">
-                  <span class="comment-author">{{ comment.username || '匿名用户' }}</span>
-                  <span class="comment-time">{{ comment.created_time }}</span>
+                  <div class="comment-user-info">
+                    <span class="comment-author">{{ comment.username || '匿名用户' }}</span>
+                  </div>
+                  <span class="comment-time">{{ formatCommentTime(comment.createdAt) }}</span>
                 </div>
                 <p class="comment-content">{{ comment.content }}</p>
               </div>
               <div v-if="comments.length === 0" class="empty-state">
-                <el-empty description="暂无评论"></el-empty>
+                <el-empty description="暂无评论，快来发表第一条评论吧~"></el-empty>
               </div>
             </div>
             
@@ -262,16 +267,21 @@
               <textarea 
                 v-model="newComment"
                 class="comment-textarea"
-                placeholder="发表评论..."
+                placeholder="发表您的看法..."
                 rows="3"
+                maxlength="500"
               ></textarea>
-              <el-button 
-                type="primary" 
-                @click="submitComment"
-                :disabled="!newComment.trim()"
-              >
-                发表评论
-              </el-button>
+              <div class="comment-input-footer">
+                <span class="char-count">{{ newComment.length }}/500</span>
+                <el-button 
+                  type="primary" 
+                  @click="submitComment"
+                  :disabled="!newComment.trim()"
+                  size="small"
+                >
+                  发表评论
+                </el-button>
+              </div>
             </div>
           </el-card>
         </div>
@@ -447,16 +457,25 @@ export default {
       })
     },
     
-    // 加载评论
+    /**
+     * 加载评论
+     */
     loadComments () {
-      axios.post('http://localhost:8085/search/searchById/comment/list', { rid: this.form.rid })
+      if (!this.museum_id || !this.object_id) {
+        return
+      }
+      
+      axios.post('http://localhost:8085/search/getComments', {
+        museumId: parseInt(this.museum_id),
+        objectId: String(this.object_id)
+      })
         .then((response) => {
           if (response.data.state === 200) {
-            this.comments = response.data.data
+            this.comments = response.data.data || []
           }
         })
         .catch((error) => {
-          console.log(error)
+          console.log('加载评论失败:', error)
         })
     },
     
@@ -1025,27 +1044,72 @@ export default {
         })
     },
     
-    // 发表评论
+    /**
+     * 格式化评论时间
+     */
+    formatCommentTime (time) {
+      if (!time) return ''
+      const date = new Date(time)
+      const now = new Date()
+      const diff = now - date
+      
+      // 1分钟内
+      if (diff < 60 * 1000) {
+        return '刚刚'
+      }
+      // 1小时内
+      if (diff < 60 * 60 * 1000) {
+        return Math.floor(diff / (60 * 1000)) + '分钟前'
+      }
+      // 1天内
+      if (diff < 24 * 60 * 60 * 1000) {
+        return Math.floor(diff / (60 * 60 * 1000)) + '小时前'
+      }
+      // 1周内
+      if (diff < 7 * 24 * 60 * 60 * 1000) {
+        return Math.floor(diff / (24 * 60 * 60 * 1000)) + '天前'
+      }
+      // 更早的显示完整日期
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    },
+    
+    /**
+     * 发表评论
+     */
     submitComment () {
       if (!this.form.uid) {
         this.$message.warning('请先登录')
         return
       }
       
-      axios.post('http://localhost:8085/search/searchById/comment', {
-        rid: this.form.rid,
-        uid: this.form.uid,
+      if (!this.newComment.trim()) {
+        this.$message.warning('请输入评论内容')
+        return
+      }
+      
+      axios.post('http://localhost:8085/search/addComment', {
+        userId: this.form.uid,
+        museumId: parseInt(this.museum_id),
+        objectId: String(this.object_id),
         content: this.newComment.trim()
       })
         .then((response) => {
           if (response.data.state === 200) {
-            this.$message.success('评论成功')
+            this.$message.success(response.data.message || '评论成功，等待审核')
             this.newComment = ''
             this.loadComments()
+          } else {
+            this.$message.error(response.data.message || '评论失败')
           }
         })
         .catch((error) => {
-          console.log(error)
+          console.log('评论失败:', error)
           this.$message.error('评论失败')
         })
     },
@@ -1343,22 +1407,43 @@ export default {
 
 .comment-list {
   margin-bottom: 20px;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .comment-item {
-  padding: 15px 0;
-  border-bottom: 1px dashed #e8e8e8;
+  padding: 15px;
+  background-color: #f9fafc;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    background-color: #f0f2f5;
+  }
 }
 
 .comment-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
+}
+
+.comment-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .comment-author {
   font-weight: bold;
   color: #303133;
+  font-size: 14px;
 }
 
 .comment-time {
@@ -1368,25 +1453,47 @@ export default {
 
 .comment-content {
   color: #606266;
-  line-height: 1.6;
+  line-height: 1.8;
+  font-size: 14px;
+  word-wrap: break-word;
 }
 
 .comment-input-section {
-  display: flex;
-  gap: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e8e8e8;
 }
 
 .comment-textarea {
-  flex: 1;
+  width: 100%;
   padding: 12px;
   border: 1px solid #dcdfe6;
-  border-radius: 4px;
+  border-radius: 8px;
   resize: none;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
     border-color: #409eff;
+    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
   }
+  
+  &::placeholder {
+    color: #c0c4cc;
+  }
+}
+
+.comment-input-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #909399;
 }
 
 /* 全屏遮罩 */

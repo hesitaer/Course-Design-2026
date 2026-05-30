@@ -4,52 +4,47 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class CommentView implements Serializable {
-    private int cid;//评论id
-    private int uid;//用户id
-    private int rid;//文物id
-    private String username;//用户名
-    private String relicname;//文物名
-    private String content;//评论内容
-    private Date created_time;//评论时间
+    private Long commentId;
+    private Long userId;
+    private Integer museumId;
+    private String objectId;
+    private String username;
+    private String objectName;
+    private String content;
+    private Integer auditStatus;
+    private Integer status;
+    private Date createdAt;
 
-    public Date getCreated_time() {
-        return created_time;
+    public Long getCommentId() {
+        return commentId;
     }
 
-    public void setCreated_time(Date created_time) {
-        this.created_time = created_time;
+    public void setCommentId(Long commentId) {
+        this.commentId = commentId;
     }
 
-    public String getContent() {
-        return content;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public int getCid() {
-        return cid;
+    public Integer getMuseumId() {
+        return museumId;
     }
 
-    public void setCid(int cid) {
-        this.cid = cid;
+    public void setMuseumId(Integer museumId) {
+        this.museumId = museumId;
     }
 
-    public int getUid() {
-        return uid;
+    public String getObjectId() {
+        return objectId;
     }
 
-    public void setUid(int uid) {
-        this.uid = uid;
-    }
-
-    public int getRid() {
-        return rid;
-    }
-
-    public void setRid(int rid) {
-        this.rid = rid;
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
     }
 
     public String getUsername() {
@@ -60,24 +55,54 @@ public class CommentView implements Serializable {
         this.username = username;
     }
 
-    public String getRelicname() {
-        return relicname;
+    public String getObjectName() {
+        return objectName;
     }
 
-    public void setRelicname(String relicname) {
-        this.relicname = relicname;
+    public void setObjectName(String objectName) {
+        this.objectName = objectName;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Integer getAuditStatus() {
+        return auditStatus;
+    }
+
+    public void setAuditStatus(Integer auditStatus) {
+        this.auditStatus = auditStatus;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     @Override
     public String toString() {
         return "CommentView{" +
-                "cid=" + cid +
-                ", uid=" + uid +
-                ", rid=" + rid +
-                ", username='" + username + '\'' +
-                ", relicname='" + relicname + '\'' +
+                "commentId=" + commentId +
+                ", userId=" + userId +
+                ", objectName='" + objectName + '\'' +
                 ", content='" + content + '\'' +
-                ", created_time=" + created_time +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

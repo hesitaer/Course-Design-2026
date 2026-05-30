@@ -1,7 +1,7 @@
 #数据库： overseas_chinese_artifacts
 spring:
   datasource:
-    url: "jdbc:mysql://47.96.152.190:3306/overseas_chinese_artifacts?serverTimezone=UTC&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true"
+    url: "jdbc:mysql://47.96.152.190:3306/overseas_chinese_artifacts?serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true"
     driverClassName: com.mysql.cj.jdbc.Driver
     username: remote_user
     password: '!software2303'
