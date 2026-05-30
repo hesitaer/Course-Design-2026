@@ -189,6 +189,18 @@
         SELECT <include refid="productFields"/>
         FROM artifact
         <include refid="Base_Where_Condition" />
+        ORDER BY 
+            <choose>
+                <when test="query.sortField == 'title'">title</when>
+                <when test="query.sortField == 'dynasty'">dynasty</when>
+                <when test="query.sortField == 'periodStartYear'">period_start_year</when>
+                <when test="query.sortField == 'crawlDate'">crawl_date</when>
+                <otherwise>title</otherwise>
+            </choose>
+            <choose>
+                <when test="query.sortOrder == 'desc'">DESC</when>
+                <otherwise>ASC</otherwise>
+            </choose>
         LIMIT #{offset}, #{limit}
     </select>
 
