@@ -70,6 +70,11 @@ const routes = [
     component: () => import('../views/fore/AntiqueCompare.vue')
   },
   {
+    path: '/dataQuery',
+    name: 'dataQuery',
+    component: () => import('../views/fore/DataQueryView.vue')
+  },
+  {
     path: '/pro_search',
     name: 'search_det',
     component: () => import('../views/fore/search_bar.vue')
