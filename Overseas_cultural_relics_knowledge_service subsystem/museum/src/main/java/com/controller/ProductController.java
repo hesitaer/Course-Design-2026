@@ -12,6 +12,9 @@ import com.service.exception.ProductNotFoundException;
 import com.util.JsonResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -359,5 +362,88 @@ public class ProductController extends BaseController {
             result.setState(6000);
         }
         return result;
+    }
+
+    @GetMapping("/keyword")
+    public JsonResult<List<Product>> keywordSearch(@RequestParam String keyword) {
+        JsonResult<List<Product>> result = new JsonResult<>();
+        try {
+            List<Product> products = iProductService.searchByKeyword(keyword);
+            result.setData(products);
+            result.setState(200);
+            result.setMessage("查询成功");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/advanced")
+    public JsonResult<Map<String, Object>> advancedSearch(@RequestBody ProductQueryDTO queryDTO) {
+        JsonResult<Map<String, Object>> result = new JsonResult<>();
+        try {
+            Map<String, Object> data = iProductService.findByConditionsWithPage(queryDTO);
+            result.setData(data);
+            result.setState(200);
+            result.setMessage("查询成功");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/multi-filter")
+    public JsonResult<List<Product>> multiFilterSearch(@RequestBody ProductQueryDTO queryDTO) {
+        JsonResult<List<Product>> result = new JsonResult<>();
+        try {
+            List<Product> products = iProductService.findByConditions(queryDTO);
+            result.setData(products);
+            result.setState(200);
+            result.setMessage("查询成功，共找到 " + products.size() + " 条记录");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/export/csv")
+    public ResponseEntity<byte[]> exportToCSV(@RequestBody ProductQueryDTO queryDTO) {
+        try {
+            String csvContent = iProductService.exportToCSV(queryDTO);
+            byte[] csvBytes = csvContent.getBytes("UTF-8");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
+            headers.setContentDispositionFormData("attachment", "cultural_relics_export.csv");
+            headers.setContentLength(csvBytes.length);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(csvBytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/export/json")
+    public ResponseEntity<byte[]> exportToJSON(@RequestBody ProductQueryDTO queryDTO) {
+        try {
+            String jsonContent = iProductService.exportToJSON(queryDTO);
+            byte[] jsonBytes = jsonContent.getBytes("UTF-8");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setContentDispositionFormData("attachment", "cultural_relics_export.json");
+            headers.setContentLength(jsonBytes.length);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(jsonBytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

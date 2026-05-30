@@ -2,8 +2,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mapper.ProductMapper">
-    
-    <!-- 通用字段定义 -->
+
     <sql id="productFields">
         museum_id AS museumId,
         object_id AS objectId,
@@ -38,20 +37,12 @@
         crawl_date AS crawlDate
     </sql>
 
-    <!--
-        通过复合主键查询文物详情
-        表名：cultural_relics_data → artifact
-        字段名全部使用新表规范
-    -->
     <select id="findByProductId" resultType="com.entity.Product">
         SELECT <include refid="productFields"/>
         FROM artifact
         WHERE museum_id = #{museumId} AND object_id = #{objectId}
     </select>
 
-    <!--
-        分页查询文物列表（支持筛选和排序）
-    -->
     <select id="findByPage" resultType="com.entity.Product">
         SELECT <include refid="productFields"/>
         FROM artifact
@@ -95,9 +86,6 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <!--
-        查询文物总数
-    -->
     <select id="countByParams" resultType="java.lang.Integer">
         SELECT COUNT(*)
         FROM artifact
@@ -128,9 +116,6 @@
         </if>
     </select>
 
-    <!--
-        根据多个ID批量查询文物
-    -->
     <select id="findByIds" resultType="com.entity.Product">
         SELECT <include refid="productFields"/>
         FROM artifact
@@ -140,32 +125,87 @@
         </foreach>
     </select>
 
-    <!--
-        获取所有文物类型
-    -->
     <select id="getAllTypes" resultType="java.lang.String">
         SELECT DISTINCT type FROM artifact WHERE type IS NOT NULL ORDER BY type
     </select>
 
-    <!--
-        获取所有朝代
-    -->
     <select id="getAllDynasties" resultType="java.lang.String">
         SELECT DISTINCT dynasty FROM artifact WHERE dynasty IS NOT NULL ORDER BY dynasty
     </select>
 
-    <!--
-        获取所有博物馆
-    -->
     <select id="getAllMuseums" resultType="java.lang.String">
         SELECT DISTINCT museum FROM artifact WHERE museum IS NOT NULL ORDER BY museum
     </select>
 
-    <!--
-        获取所有材质
-    -->
     <select id="getAllMaterials" resultType="java.lang.String">
         SELECT DISTINCT material FROM artifact WHERE material IS NOT NULL ORDER BY material
+    </select>
+
+    <sql id="Base_Where_Condition">
+        <where>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (title LIKE CONCAT('%', #{query.keyword}, '%')
+                OR artist LIKE CONCAT('%', #{query.keyword}, '%')
+                OR dynasty LIKE CONCAT('%', #{query.keyword}, '%')
+                OR description LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
+            <if test="query.title != null and query.title != ''">
+                AND title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.artist != null and query.artist != ''">
+                AND artist LIKE CONCAT('%', #{query.artist}, '%')
+            </if>
+            <if test="query.dynasty != null and query.dynasty != ''">
+                AND dynasty = #{query.dynasty}
+            </if>
+            <if test="query.period != null and query.period != ''">
+                AND period LIKE CONCAT('%', #{query.period}, '%')
+            </if>
+            <if test="query.type != null and query.type != ''">
+                AND type = #{query.type}
+            </if>
+            <if test="query.material != null and query.material != ''">
+                AND material = #{query.material}
+            </if>
+            <if test="query.culture != null and query.culture != ''">
+                AND culture = #{query.culture}
+            </if>
+            <if test="query.museum != null and query.museum != ''">
+                AND museum = #{query.museum}
+            </if>
+            <if test="query.museumId != null">
+                AND museum_id = #{query.museumId}
+            </if>
+        </where>
+    </sql>
+
+    <select id="findByConditions" resultType="com.entity.Product">
+        SELECT <include refid="productFields"/>
+        FROM artifact
+        <include refid="Base_Where_Condition" />
+    </select>
+
+    <select id="findByConditionsWithPage" resultType="com.entity.Product">
+        SELECT <include refid="productFields"/>
+        FROM artifact
+        <include refid="Base_Where_Condition" />
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByConditions" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM artifact
+        <include refid="Base_Where_Condition" />
+    </select>
+
+    <select id="searchByKeyword" resultType="com.entity.Product">
+        SELECT <include refid="productFields"/>
+        FROM artifact
+        WHERE title LIKE CONCAT('%', #{keyword}, '%')
+        OR artist LIKE CONCAT('%', #{keyword}, '%')
+        OR dynasty LIKE CONCAT('%', #{keyword}, '%')
+        OR description LIKE CONCAT('%', #{keyword}, '%')
+        LIMIT 50
     </select>
 
 </mapper>
