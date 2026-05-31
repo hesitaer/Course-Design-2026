@@ -969,16 +969,17 @@ export default {
         this.$message.warning('请先登录')
         return
       }
-      
-      const url = this.isCollected 
-        ? 'http://localhost:8085/user_admin/deleteCollect' 
+
+      const isCancel = this.isCollected
+      const url = isCancel
+        ? 'http://localhost:8085/user_admin/deleteCollect'
         : 'http://localhost:8085/search/searchById/collect'
-      
-      axios.post(url, {
-        uid: this.form.uid,
-        museumId: String(this.museum_id),
-        objectId: String(this.object_id)
-      })
+
+      const params = isCancel
+        ? { userId: this.form.uid, museumId: String(this.museum_id), objectId: String(this.object_id) }
+        : { uid: this.form.uid, museumId: String(this.museum_id), objectId: String(this.object_id) }
+
+      axios.post(url, params)
         .then((response) => {
           if (response.data.state === 200) {
             this.isCollected = !this.isCollected
@@ -990,7 +991,6 @@ export default {
           this.$message.error('操作失败')
         })
         .finally(() => {
-          // 通知其他页面收藏状态变化
           window.dispatchEvent(new Event('collectChange'))
         })
     },

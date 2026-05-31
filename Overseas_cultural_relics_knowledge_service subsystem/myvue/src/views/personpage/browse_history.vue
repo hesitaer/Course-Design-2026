@@ -75,7 +75,9 @@ export default {
         const history = storage.getItem('browse_history')
         if (history) {
           let list = JSON.parse(history)
-          list = list.filter(h => !(h.object_id === data.object_id && h.museum_id === data.museum_id))
+          const museumId = data.museumId
+          const objectId = data.objectId
+          list = list.filter(h => !(String(h.museum_id) === String(museumId) && String(h.object_id) === String(objectId)))
           storage.setItem('browse_history', JSON.stringify(list))
           this.historyList = list
           this.$message({

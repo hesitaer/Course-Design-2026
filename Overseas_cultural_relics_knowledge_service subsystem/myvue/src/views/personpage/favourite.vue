@@ -62,7 +62,7 @@ export default {
         type: 'warning'
       }).then(() => {
         axios.post('http://localhost:8085/user_admin/deleteCollect', {
-          uid: localStorage.getItem('user_id') || localStorage.getItem('username'),
+          userId: localStorage.getItem('user_id') || localStorage.getItem('username'),
           museumId: String(data.museumId),
           objectId: String(data.objectId)
         })
