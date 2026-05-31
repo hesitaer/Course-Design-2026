@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-
+import MuseumMap from '../views/visualization/MuseumMap.vue'
 const routes = [
   {
     path: '/',
@@ -14,6 +14,10 @@ const routes = [
     name: 'antiqueDetail',
     component: () => import('../views/antiqueDetail/antiqueDetail.vue')
   },
+  {
+  path: '/museum-map',
+  component: MuseumMap
+},
   {
     path: '/index',
     name: 'IndexView',
