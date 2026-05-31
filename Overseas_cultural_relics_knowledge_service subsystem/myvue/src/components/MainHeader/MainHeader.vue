@@ -25,6 +25,12 @@
         </div>
       </router-link>
 
+      <router-link to="/dataQuery">
+        <div class="float-left">
+          <el-menu-item class="disable-element-hover" index="dataQuery">文物搜索</el-menu-item>
+        </div>
+      </router-link>
+
       <router-link to="/pro_search">
         <div class="float-right">
           <el-menu-item class="disable-element-hover" index="pro_search">专业搜索</el-menu-item>
