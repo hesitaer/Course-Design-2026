@@ -14,7 +14,7 @@
               @click="openFullscreen"
             >
               <img 
-                :src="getValidImageUrl(artifact.imageUrl || artifact.image_url || artifact.img_url)" 
+                :src="getValidImageUrl(artifact)" 
                 class="main-image"
                 :style="{ transform: `scale(${scale})` }"
                 alt="文物图片"
@@ -220,7 +220,7 @@
                     <router-link 
                       :to="{path: '/antiqueDetail', query: {id: item.id, museum_id: item.museum_id, object_id: item.object_id}}"
                     >
-                      <img :src="getValidImageUrl(item.image_url || item.ImageUrl || item.img_url)" class="recommend-image" alt="">
+                      <img :src="getValidImageUrl(item)" class="recommend-image" alt="">
                       <div class="recommend-info">
                         <span class="recommend-title">{{ item.title }}</span>
                         <span class="recommend-dynasty">{{ item.dynasty }}</span>
@@ -285,7 +285,7 @@
           <i class="el-icon-close"></i>
         </button>
         <img 
-          :src="getValidImageUrl(artifact.imageUrl || artifact.image_url || artifact.img_url)" 
+          :src="getValidImageUrl(artifact)" 
           class="fullscreen-image"
           :style="{ transform: `scale(${fullscreenScale})` }"
           @wheel="handleFullscreenZoom"
@@ -355,6 +355,8 @@ export default {
       newComment: '',
       // 默认图片（使用base64 SVG，避免外部依赖）
       defaultImage: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f5f5f5" width="400" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="16" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E暂无图片%3C/text%3E%3C/svg%3E',
+      // 服务器图片API地址（仅用于博物馆2、3）
+      serverApiBase: 'http://47.96.152.190:8000',
       // 表单数据
       form: {
         rid: '',
@@ -566,28 +568,37 @@ export default {
     },
     
     // 校验图片URL是否有效
-    getValidImageUrl (imageUrl) {
-      // 检查多种空值情况
-      if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined' || imageUrl === '' || imageUrl === 'NULL') {
-        return this.defaultImage
-      }
+    getValidImageUrl (item) {
+      const { imageUrl, image_url, img_url, museum_id, object_id } = item
+      const url = imageUrl || image_url || img_url
+      const museumIdNum = parseInt(museum_id) || parseInt(this.museum_id)
+      const objId = object_id || this.object_id
       
-      // 检查URL是否完整（包含http://或https://）
-      if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-        // 尝试添加协议
-        if (imageUrl.startsWith('//')) {
-          return 'https:' + imageUrl
+      // 仅博物馆2、3调用服务器API
+      if (museumIdNum === 2 || museumIdNum === 3) {
+        if (objId && objId !== 'null' && objId !== 'undefined') {
+          return `${this.serverApiBase}/api/img/${museumIdNum}/${objId}`
         }
-        // 不完整的URL，使用默认图片
         return this.defaultImage
       }
       
-      // 检查URL是否有效（简单检查）
+      // 其他博物馆（如博物馆1）使用原有逻辑
+      if (!url || url === 'null' || url === 'undefined' || url === '' || url === 'NULL') {
+        return this.defaultImage
+      }
+      
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        if (url.startsWith('//')) {
+          return 'https:' + url
+        }
+        return this.defaultImage
+      }
+      
       try {
-        new URL(imageUrl)
-        return imageUrl
+        new URL(url)
+        return url
       } catch (e) {
-        console.log('Invalid image URL:', imageUrl)
+        console.log('Invalid image URL:', url)
         return this.defaultImage
       }
     },
