@@ -20,6 +20,26 @@ public class ProductQueryDTO {
     private String sortField = "title"; // 排序字段
     private String sortOrder = "asc"; // 排序方向
 
+    public String getKeyword() { return keyword; }
+    public void setKeyword(String keyword) { this.keyword = keyword; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public String getArtist() { return artist; }
+    public void setArtist(String artist) { this.artist = artist; }
+    public String getDynasty() { return dynasty; }
+    public void setDynasty(String dynasty) { this.dynasty = dynasty; }
+    public String getPeriod() { return period; }
+    public void setPeriod(String period) { this.period = period; }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+    public String getMaterial() { return material; }
+    public void setMaterial(String material) { this.material = material; }
+    public String getCulture() { return culture; }
+    public void setCulture(String culture) { this.culture = culture; }
+    public String getMuseum() { return museum; }
+    public void setMuseum(String museum) { this.museum = museum; }
+    public Integer getMuseumId() { return museumId; }
+    public void setMuseumId(Integer museumId) { this.museumId = museumId; }
     public Integer getPageNum() { return pageNum; }
     public void setPageNum(Integer pageNum) { this.pageNum = pageNum; }
     public Integer getPageSize() { return pageSize; }

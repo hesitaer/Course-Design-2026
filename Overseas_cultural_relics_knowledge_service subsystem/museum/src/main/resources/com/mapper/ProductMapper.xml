@@ -147,7 +147,9 @@
                 AND (title LIKE CONCAT('%', #{query.keyword}, '%')
                 OR artist LIKE CONCAT('%', #{query.keyword}, '%')
                 OR dynasty LIKE CONCAT('%', #{query.keyword}, '%')
-                OR description LIKE CONCAT('%', #{query.keyword}, '%'))
+                OR type LIKE CONCAT('%', #{query.keyword}, '%')
+                OR material LIKE CONCAT('%', #{query.keyword}, '%')
+                OR museum LIKE CONCAT('%', #{query.keyword}, '%'))
             </if>
             <if test="query.title != null and query.title != ''">
                 AND title LIKE CONCAT('%', #{query.title}, '%')
@@ -216,7 +218,9 @@
         WHERE title LIKE CONCAT('%', #{keyword}, '%')
         OR artist LIKE CONCAT('%', #{keyword}, '%')
         OR dynasty LIKE CONCAT('%', #{keyword}, '%')
-        OR description LIKE CONCAT('%', #{keyword}, '%')
+        OR type LIKE CONCAT('%', #{keyword}, '%')
+        OR material LIKE CONCAT('%', #{keyword}, '%')
+        OR museum LIKE CONCAT('%', #{keyword}, '%')
         LIMIT 50
     </select>
 
