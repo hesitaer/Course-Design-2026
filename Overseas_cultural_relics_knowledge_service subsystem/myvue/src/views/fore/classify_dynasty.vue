@@ -36,7 +36,6 @@
             <el-radio v-model="searchForm.v_1" label="Shang（商）">商</el-radio>
             <el-radio v-model="searchForm.v_1" label="Zhou（周）">周</el-radio>
             <el-radio v-model="searchForm.v_1" label="Qin（秦）">秦</el-radio>
-            <el-radio v-model="searchForm.v_1" label="Han（汉）">汉</el-radio>
             <el-radio v-model="searchForm.v_1" label="Western Han（西汉）">西汉</el-radio>
             <el-radio v-model="searchForm.v_1" label="Eastern Han（东汉）">东汉</el-radio>
             <el-radio v-model="searchForm.v_1" label="Three Kingdoms（三国）">三国</el-radio>
@@ -46,7 +45,6 @@
             <el-radio v-model="searchForm.v_1" label="Sui（隋）">隋</el-radio>
             <el-radio v-model="searchForm.v_1" label="Tang（唐）">唐</el-radio>
             <el-radio v-model="searchForm.v_1" label="Five Dynasties（五代）">五代</el-radio>
-            <el-radio v-model="searchForm.v_1" label="Song">宋</el-radio>
             <el-radio v-model="searchForm.v_1" label="Northern Song（北宋）">北宋</el-radio>
             <el-radio v-model="searchForm.v_1" label="Southern Song（南宋）">南宋</el-radio>
             <el-radio v-model="searchForm.v_1" label="Jin（金）">金</el-radio>
@@ -157,11 +155,10 @@ export default {
       if (this.searchForm.v_1 === '') { 
         alert('请选择朝代') 
       } else {
-        // 提取英文部分（移除括号及其内容）
-        const dynastyValue = this.searchForm.v_1.replace(/（.*?）/g, '').trim()
+        // 使用完整的label值进行精确匹配
         const requestData = {
           c: this.searchForm.c,
-          v_1: dynastyValue
+          v_1: this.searchForm.v_1
         }
         this.$axios.post('http://localhost:8085/search/classification', requestData).then((response) => {
           console.log(response.data)
@@ -273,7 +270,7 @@ export default {
 /* 单选框网格 */
 .radio-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 15px;
   margin-bottom: 30px;
 }
@@ -283,6 +280,12 @@ export default {
   background: #f8f9fa;
   border-radius: 8px;
   transition: all 0.3s ease;
+  text-align: center;
+  width: 100%;
+  min-width: 100px;
+  max-width: 120px;
+  box-sizing: border-box;
+  flex: 1;
   
   &:hover {
     background: #e9ecef;

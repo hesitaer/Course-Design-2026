@@ -178,7 +178,7 @@ export default {
   methods: {
     // 加载轮播图数据
     loadCarousel () {
-      axios.post('http://localhost:8085/search/classification', { c: 'dynasty', v_1: 'Tang' })
+      axios.post('http://localhost:8085/search/classification', { c: 'dynasty', v_1: 'Tang（唐）' })
         .then(response => {
           if (response.data.state === 200 && response.data.data.length > 0) {
             const items = response.data.data.slice(0, 5)

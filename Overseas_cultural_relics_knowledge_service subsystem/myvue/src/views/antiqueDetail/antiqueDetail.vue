@@ -27,6 +27,14 @@
                 <el-button 
                   type="default" 
                   size="small" 
+                  @click="goBack"
+                  icon="el-icon-arrow-left"
+                >
+                  返回
+                </el-button>
+                <el-button 
+                  type="default" 
+                  size="small" 
                   @click="zoomOut"
                   icon="el-icon-minus"
                 >
@@ -161,8 +169,9 @@
                 :key="index"
                 class="triple-item"
               >
-                <div class="knowledge-title">{{ item.title }}</div>
-                <div class="knowledge-content">{{ item.content }}</div>
+                <span class="triple-subject">{{ item.subject }}</span>
+                <span class="triple-predicate">{{ item.predicate }}</span>
+                <span class="triple-object">{{ item.object }}</span>
               </div>
               <div v-if="knowledgeTriples.length === 0" class="empty-state">
                 <el-empty description="暂无知识图谱关联数据"></el-empty>
@@ -178,7 +187,7 @@
                   :key="index"
                   type="info"
                   closable
-                  @click="searchEntity(entity)"
+
                 >
                   {{ entity }}
                 </el-tag>
@@ -387,6 +396,16 @@ export default {
     }
   },
   methods: {
+    // 返回上一页
+    goBack () {
+      // 尝试使用浏览器历史返回
+      if (window.history.length > 1) {
+        window.history.back()
+      } else {
+        // 如果没有历史记录，跳转到浏览页面
+        this.$router.push('/fore')
+      }
+    },
     // 页面初始化
     pageInit () {
       this.form.uid = window.localStorage.getItem('user_id') || window.localStorage.getItem('username')
@@ -464,18 +483,18 @@ export default {
     
     // 加载知识图谱数据
     loadKnowledgeGraph () {
-      axios.post('http://localhost:8085/search/knowledge', { artifactId: this.form.rid })
+      axios.post('http://localhost:8085/search/knowledge', { 
+        museumId: parseInt(this.museum_id), 
+        objectId: String(this.object_id)
+      })
         .then((response) => {
           if (response.data.state === 200) {
-            // 后端返回的是 [{title, content}, ...] 格式
             this.knowledgeTriples = response.data.data || []
-            // 从知识数据中提取关联实体
-            this.relatedEntities = this.knowledgeTriples.map(item => item.title) || []
+            this.relatedEntities = [...new Set(this.knowledgeTriples.map(item => item.object).filter(Boolean))]
           }
         })
         .catch((error) => {
           console.log(error)
-          // 使用模拟数据
           this.loadMockKnowledgeData()
         })
     },
@@ -512,12 +531,10 @@ export default {
     loadRelatedByOtherConditions () {
       // 如果朝代不为空且不是"未知"，尝试按朝代查询
       if (this.artifact.dynasty && this.artifact.dynasty !== '未知') {
-        const dynastyKey = this.artifact.dynasty.match(/^([A-Za-z][A-Za-z\s]*)/)
-        const dynastyEn = dynastyKey ? dynastyKey[1].trim() : this.artifact.dynasty
-        
+        // 使用完整的朝代值进行精确匹配（如 "Tang（唐）"）
         axios.post('http://localhost:8085/search/classification', { 
           c: 'dynasty',
-          v_1: dynastyEn
+          v_1: this.artifact.dynasty
         })
           .then((response) => {
             if (response.data.state === 200 && response.data.data.length > 0) {
@@ -543,7 +560,7 @@ export default {
     loadRandomArtifacts () {
       axios.post('http://localhost:8085/search/classification', { 
         c: 'dynasty',
-        v_1: 'Shang' // 使用已知的朝代来获取数据
+        v_1: 'Shang（商）' // 使用完整格式进行精确匹配
       })
         .then((response) => {
             if (response.data.state === 200 && response.data.data.length > 0) {
@@ -829,16 +846,25 @@ export default {
       }
     },
     
-    // 加载模拟知识图谱数据
+    // 加载模拟知识图谱数据（使用当前文物的真实数据）
     loadMockKnowledgeData () {
+      const relicName = this.artifact.title || this.artifact.object_name || '文物'
+      const dynasty = this.artifact.dynasty || '未知朝代'
+      const type = this.artifact.type || '文物'
+      const material = this.getMaterial(this.artifact.material) || '未知材质'
+      const museum = this.artifact.museum || '未知博物馆'
+      const culture = this.artifact.culture || '中国文化'
+      const artist = this.artifact.artist || '未知作者'
+      
       this.knowledgeTriples = [
-        { subject: '青铜方鼎', predicate: '创作于', object: '商朝' },
-        { subject: '青铜方鼎', predicate: '材质为', object: '青铜' },
-        { subject: '青铜方鼎', predicate: '收藏于', object: '史密森尼博物馆' },
-        { subject: '青铜方鼎', predicate: '属于', object: '青铜器' },
-        { subject: '青铜方鼎', predicate: '出土于', object: '河南安阳' }
+        { subject: relicName, predicate: '创作于', object: dynasty },
+        { subject: relicName, predicate: '材质为', object: material },
+        { subject: relicName, predicate: '收藏于', object: museum },
+        { subject: relicName, predicate: '属于', object: type },
+        { subject: relicName, predicate: '代表', object: culture },
+        { subject: relicName, predicate: '作者', object: artist }
       ]
-      this.relatedEntities = ['商朝', '青铜器', '史密森尼博物馆', '河南安阳', '青铜']
+      this.relatedEntities = [dynasty, material, museum, type, culture, artist]
     },
     
     // 加载模拟相关文物数据

@@ -8,12 +8,12 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/,file:uploads/
-#neo4j数据库： neo4j还未修改配置
+#neo4j数据库配置
   neo4j:
-    uri: neo4j+s://0e2544eb.databases.neo4j.io:7687
+    uri: bolt://47.96.152.190:7687
     authentication:
       username: neo4j
-      password: ChhPfOMH7cPmszEgGQPv56FlZt_CIOTQRfKwOz0rXmE
+      password: '!software2303'
 
 
 mybatis:

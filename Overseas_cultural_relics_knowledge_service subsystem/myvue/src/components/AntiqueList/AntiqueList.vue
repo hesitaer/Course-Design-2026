@@ -560,7 +560,8 @@ export default {
         period_start_year: item.period_start_year,
         period_end_year: item.period_end_year,
         culture: item.culture || '',
-        image_url: item.image_url || ''
+        image_url: item.image_url || '',
+        img_url: item.img_url || ''
       }
       this.compareList.push(compareItem)
       localStorage.setItem('compareList', JSON.stringify(this.compareList))

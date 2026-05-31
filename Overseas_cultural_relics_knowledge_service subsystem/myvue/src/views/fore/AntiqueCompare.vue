@@ -34,7 +34,7 @@
                 class="selected-item"
               >
                 <div class="item-image">
-                  <img :src="item.image_url || defaultImage" alt="">
+                  <img :src="getValidImageUrl(item)" alt="">
                 </div>
                 <div class="item-info">
                   <h4>{{ item.title }}</h4>
@@ -68,7 +68,7 @@
                       class="artifact-header"
                     >
                       <div class="artifact-header-content">
-                        <img :src="item.image_url || defaultImage" alt="" class="header-image">
+                        <img :src="getValidImageUrl(item)" alt="" class="header-image">
                         <span class="header-title">{{ item.title }}</span>
                       </div>
                     </th>
@@ -199,7 +199,8 @@ export default {
   data () {
     return {
       compareList: [],
-      defaultImage: 'https://via.placeholder.com/100x100?text=No+Image'
+      defaultImage: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f5f5f5" width="200" height="200"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E暂无图片%3C/text%3E%3C/svg%3E',
+      serverApiBase: 'http://47.96.152.190:8000'
     }
   },
   created () {
@@ -268,9 +269,33 @@ export default {
       return start === end ? startYear : `${startYear} - ${endYear}`
     },
     
-    // 跳转到浏览页面
+    // 获取有效的图片URL（与AntiqueList一致的逻辑）
+    getValidImageUrl (item) {
+      const { image_url, img_url, museum_id, object_id } = item
+      const imageUrl = image_url || img_url
+      const museumIdNum = parseInt(museum_id)
+      
+      // 仅博物馆2、3调用服务器API
+      if (museumIdNum === 2 || museumIdNum === 3) {
+        if (object_id && object_id !== 'null' && object_id !== 'undefined') {
+          return `${this.serverApiBase}/api/img/${museumIdNum}/${object_id}`
+        }
+        return this.defaultImage
+      }
+      
+      // 其他博物馆使用原有逻辑
+      if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') {
+        return this.defaultImage
+      }
+      if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+        return this.defaultImage
+      }
+      return imageUrl
+    },
+    
+    // 跳转到分类浏览页面
     goToBrowse () {
-      this.$router.push('/antiqueList')
+      this.$router.push('/classify')
     },
     
     // 清空对比列表

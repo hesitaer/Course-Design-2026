@@ -255,7 +255,7 @@ export default {
 /* 单选框网格 */
 .radio-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 15px;
   margin-bottom: 30px;
 }
@@ -265,6 +265,11 @@ export default {
   background: #f8f9fa;
   border-radius: 8px;
   transition: all 0.3s ease;
+  text-align: center;
+  width: 100%;
+  min-width: 100px;
+  max-width: 120px;
+  box-sizing: border-box;
   
   &:hover {
     background: #e9ecef;
