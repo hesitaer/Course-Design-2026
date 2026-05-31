@@ -16,8 +16,8 @@
     </select>
 
     <insert id="insert_user" useGeneratedKeys="true" keyProperty="user_id">
-        insert into user(username, password, sex, phone, user_source, status, register_time, created_at, updated_at)
-        values (#{username}, #{password}, #{sex}, #{phone}, 'web', #{status}, NOW(), NOW(), NOW());
+        insert into user(username, password, sex, phone, user_source, status, can_comment, can_upload, register_time, created_at, updated_at)
+        values (#{username}, #{password}, #{sex}, #{phone}, 'web', #{status}, 1, 1, NOW(), NOW(), NOW());
     </insert>
 
     <update id="update">

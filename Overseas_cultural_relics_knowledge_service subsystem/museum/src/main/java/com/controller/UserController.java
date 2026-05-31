@@ -2,6 +2,9 @@ package com.controller;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.entity.LoginLog;
+import com.entity.User;
+import com.mapper.LoginLogMapper;
 import com.mapper.UserMapper;
 import com.service.IUserService;
 import com.service.exception.PasswordNotMatchException;
@@ -9,13 +12,13 @@ import com.service.exception.UserLimitedLoginException;
 import com.service.exception.UserNotFoundException;
 import com.service.exception.userRepetitionException;
 import com.util.JsonResult;
-import com.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,37 +29,53 @@ public class UserController {
     private IUserService userService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private LoginLogMapper loginLogMapper;
 
     @RequestMapping("/login")
     JsonResult<User> login(@RequestBody Map map, HttpServletRequest request){
         JsonResult<User> result = new JsonResult<User>();
+        String username = (String)map.get("username");
+        String password = (String)map.get("password");
+        String ip = getClientIp(request);
+        String userAgent = request.getHeader("User-Agent");
+
         try{
-            String username = (String)map.get("username");
-            String password = (String)map.get("password");
             User u = userService.loginByUsername(username, password);
             String secret = "abcdef";
             String token = JWT.create().
                     withClaim("id", u.getUser_id()).
                     withClaim("username", u.getUsername()).
                     sign(Algorithm.HMAC256(secret));
-            
-            String ip = getClientIp(request);
+
             userMapper.updateLastLogin(u.getUser_id(), ip);
-            
+
+            LoginLog loginLog = new LoginLog("USER", u.getUser_id(), username, "SUCCESS", ip, "web", userAgent, new Date());
+            loginLogMapper.insertLoginLog(loginLog);
+
             result.setState(200);
             result.setMessage("登录成功！");
             result.setToken(token);
             result.setData(u);
             return result;
         } catch(UserNotFoundException e){
+            LoginLog loginLog = new LoginLog("USER", null, username, "USER_NOT_FOUND", ip, "web", userAgent, new Date());
+            loginLogMapper.insertLoginLog(loginLog);
+
             result.setMessage("用户不存在");
             result.setState(4000);
             return result;
         } catch(PasswordNotMatchException e){
+            LoginLog loginLog = new LoginLog("USER", null, username, "PASSWORD_ERROR", ip, "web", userAgent, new Date());
+            loginLogMapper.insertLoginLog(loginLog);
+
             result.setMessage("密码错误");
             result.setState(6000);
             return result;
         } catch(UserLimitedLoginException e){
+            LoginLog loginLog = new LoginLog("USER", null, username, "LOGIN_LIMITED", ip, "web", userAgent, new Date());
+            loginLogMapper.insertLoginLog(loginLog);
+
             result.setMessage("用户被限制登录");
             result.setState(9000);
             return result;

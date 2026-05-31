@@ -72,7 +72,8 @@ export default {
             storage.setItem('user_username', user.username)
             storage.setItem('user_nickname', user.nickname || '')
             storage.setItem('user_avatar', user.avatar_url || '')
-            storage.setItem('user_comment', user.user_comment || 0)
+            storage.setItem('can_comment', user.canComment || 1)
+            storage.setItem('can_upload', user.canUpload || 1)
             storage.setItem('islogin', 1)
             
             this.$message({

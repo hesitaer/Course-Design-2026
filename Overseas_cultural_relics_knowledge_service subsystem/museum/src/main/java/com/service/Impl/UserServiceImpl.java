@@ -94,8 +94,8 @@ public class UserServiceImpl implements IUserService {
         user.setPhone(phone);
         user.setUser_source("web");
         user.setStatus(1);
-        user.setUser_comment(0);
-        user.setUser_login(1);
+        user.setCanComment(1);
+        user.setCanUpload(1);
 
         int row = userMapper.insert_user(user);
         if(row == 1) {
