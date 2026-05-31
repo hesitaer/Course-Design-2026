@@ -32,7 +32,7 @@
 <!--      <router-link v-if="isLogin" :to="{ name: 'Dashboard' }">-->
       <router-link to="/personpage">
         <div class="float-right">
-          <el-menu-item class="disable-element-hover">后台管理</el-menu-item>
+          <el-menu-item class="disable-element-hover">个人中心</el-menu-item>
         </div>
       </router-link>
 <!--      </router-link>-->

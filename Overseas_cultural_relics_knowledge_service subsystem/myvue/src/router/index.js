@@ -60,6 +60,16 @@ const routes = [
     component: () => import('../views/fore/classify_usea.vue')
   },
   {
+    path: '/antiqueList',
+    name: 'antiqueList',
+    component: () => import('../views/fore/AntiqueListDemo.vue')
+  },
+  {
+    path: '/antiqueCompare',
+    name: 'antiqueCompare',
+    component: () => import('../views/fore/AntiqueCompare.vue')
+  },
+  {
     path: '/pro_search',
     name: 'search_det',
     component: () => import('../views/fore/search_bar.vue')
@@ -109,11 +119,6 @@ const routes = [
         component: () => import('../views/personpage/myComment.vue')
       },
       {
-        path: 'changeimg',
-        name: 'changeimg',
-        component: () => import('../views/personpage/changeimg.vue')
-      },
-      {
         path: 'changeinfo',
         name: 'changeinfo',
         component: () => import('../views/personpage/changeinfo.vue')
@@ -122,6 +127,11 @@ const routes = [
         path: 'favourite',
         name: 'favourite',
         component: () => import('../views/personpage/favourite.vue')
+      },
+      {
+        path: 'browse_history',
+        name: 'browse_history',
+        component: () => import('../views/personpage/browse_history.vue')
       },
       {
         path: 'info',

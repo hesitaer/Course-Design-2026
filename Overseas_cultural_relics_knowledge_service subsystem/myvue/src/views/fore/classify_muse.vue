@@ -1,332 +1,319 @@
-
 <template>
 <div>
   <MainHeader></MainHeader>
-  <el-container>
-    <el-main>
-      <div>
-        <div v-if="flag">
-      <div >
-        <span class="title">选择博物馆</span>
-        <el-radio v-model="searchForm.v_4" label="Freersackler">史密斯博物馆</el-radio>
-        <el-radio v-model="searchForm.v_4" label="Denver Art Museum">波士顿美术馆</el-radio>
-        <el-radio v-model="searchForm.v_4" label="Rubin Museum">哈佛大学博物馆</el-radio>
-        <el-radio v-model="searchForm.v_4" label="Asia Society Museum">亚洲协会及其博物馆</el-radio>
-        <el-radio v-model="searchForm.v_4" label="David Owsley Museum of Art">大卫奥斯利艺术博物馆</el-radio>
-      </div>
-          <el-button type="primary" @click="onSubmit_to_search">确 定</el-button>
+  
+  <!-- 对比导航栏 -->
+  <div v-if="compareCount >= 2" class="compare-nav-bar">
+    <el-card class="compare-nav-card">
+      <div class="compare-nav-content">
+        <div class="compare-nav-info">
+          <i class="el-icon-data-line"></i>
+          <span>已选择 <strong>{{ compareCount }}</strong> 件文物进行对比</span>
         </div>
-        <div v-else >
-          <el-button type="primary" @click="ars">按字母降序</el-button>
-          <el-button type="primary" @click="up">按字母升序</el-button>
-          <div style="font-size: 14px;">
-            <div style="background-color: #d3dce6;color: gray;">
-              <div style="margin: 0 200px;">
-                <div style="display: flex;margin-bottom: 20px;">
-                  <el-row>
-                    <el-col v-for="(item,index) in res_form" :key="(item,index)" :span="6">
-                      <div class="grid-content bg-purple" :style="'flex: 1;border: 1px solid #dfdfdf;'+(index>-1?'margin-left: 20px;':'')" >
-                        <router-link :to="{path: '/antiqueDetail', query: {id:item.id}}">
-                          <el-card :body-style="{ padding: '0px',width:'300px',height:'400px' }"class="vert">
-                            <img :src="item.img_url" class="image" alt="">
-                            <div style="padding: 14px;">
-                              <span>{{item.object_name}}</span>
-                              <div class="bottom clearfix">
-                                <time class="time">{{ item.cat2 }}</time>
-                                <el-button type="text" class="button" >详情</el-button>
-                              </div>
-                            </div>
-                          </el-card>
-                        </router-link>
-                      </div>
-                    </el-col>
-                  </el-row>
-                </div>
-
-              </div>
-              </div>
-            </div>
+        <div class="compare-nav-actions">
+          <el-button type="warning" size="medium" @click="goToCompare">
+            <i class="el-icon-s-data"></i>
+            查看对比
+          </el-button>
+          <el-button size="medium" @click="clearCompare">
+            清空
+          </el-button>
+        </div>
+      </div>
+    </el-card>
+  </div>
+  
+    <div class="filter-page">
+      <div v-if="flag" class="filter-container">
+        <div class="filter-header">
+          <h2 class="filter-title">选择博物馆</h2>
+          <p class="filter-desc">浏览不同博物馆收藏的珍贵文物</p>
+        </div>
+        
+        <div class="filter-card">
+          <div class="radio-grid">
+            <el-radio v-model="searchForm.v_4" label="Smithsonian Institution">史密斯博物馆</el-radio>
+            <el-radio v-model="searchForm.v_4" label="Harvard Art Museums">哈佛大学博物馆</el-radio>
+            <el-radio v-model="searchForm.v_4" label="Museum of Fine Arts, Boston">波士顿美术馆</el-radio>
+          </div>
+          
+          <div class="filter-actions">
+            <el-button type="primary" size="large" @click="onSubmit_to_search">
+              <i class="el-icon-search"></i>
+              确 定
+            </el-button>
           </div>
         </div>
-
-    </el-main>
-  </el-container>
-  <MainFooter></MainFooter>
-</div>
+      </div>
+      
+      <div v-else class="result-container">
+        <div class="back-button-wrapper">
+          <el-button type="primary" @click="flag = true">
+            <i class="el-icon-arrow-left"></i>
+            返回选择
+          </el-button>
+        </div>
+        
+        <AntiqueList 
+          :data="res_form"
+          :default-sort="'title'"
+          :default-order="'asc'"
+          :compare-count="compareCount"
+          @view-change="handleViewChange"
+          @sort-change="handleSortChange"
+          @compare-change="handleCompareChange"
+        ></AntiqueList>
+      </div>
+    </div>
+    <MainFooter></MainFooter>
+  </div>
 </template>
 
 <script>
 import axios from 'axios'
 import MainFooter from '../../components/MainFooter/MainFooter'
 import MainHeader from '../../components/MainHeader/MainHeader'
+import AntiqueList from '../../components/AntiqueList/AntiqueList.vue'
 export default {
-  name: 'search_bar',
+  name: 'classify_muse',
   components: {
     MainHeader,
-    MainFooter
+    MainFooter,
+    AntiqueList
   },
   data () {
     return {
-      // 避免多个select选值混乱
       searchForm: {
         c: 'museum',
         v_4: ''
       },
-      res_form: [{
-        object_name: '',
-        cat2: '',
-        img_url: '',
-        // eslint-disable-next-line no-undef
-        id: 0
-      }],
-      flag: true
+      res_form: [],
+      flag: true,
+      compareCount: 0
     }
   },
+  created () {
+    this.updateCompareCount()
+  },
+  beforeDestroy () {
+    window.removeEventListener('storage', this.handleStorageChange)
+  },
   methods: {
+    // 更新对比数量
+    updateCompareCount () {
+      const compareList = JSON.parse(localStorage.getItem('compareList') || '[]')
+      this.compareCount = compareList.length
+      window.addEventListener('storage', this.handleStorageChange)
+    },
+    
+    // 处理 storage 变化
+    handleStorageChange (e) {
+      if (e.key === 'compareList') {
+        this.updateCompareCount()
+      }
+    },
+    
+    // 跳转到对比页面
+    goToCompare () {
+      this.$router.push('/antiqueCompare')
+    },
+    
+    // 清空对比列表
+    clearCompare () {
+      localStorage.removeItem('compareList')
+      this.updateCompareCount()
+      this.$message.success('已清空对比列表')
+    },
+    
+    handleViewChange (mode) {
+      console.log('视图模式切换:', mode)
+    },
+    handleSortChange (params) {
+      console.log('排序参数:', params)
+    },
+    handleCompareChange (count) {
+      this.compareCount = count
+    },
     onSubmit_to_search () {
-      if (this.searchForm.v_4 === '') { alert('请选择博物馆') } else {
-        axios.post('http://localhost:8085/search/classification', this.searchForm).then((response) => {
+      if (this.searchForm.v_4 === '') { 
+        alert('请选择博物馆') 
+      } else {
+        this.$axios.post('http://localhost:8085/search/classification', this.searchForm).then((response) => {
           console.log(response.data)
           if (response.data.state === 200) {
-            // eslint-disable-next-line no-sequences,no-unused-expressions
-            this.res_form = response.data.data,
+            this.res_form = response.data.data
             this.flag = false
           } else {
             alert(response.data)
           }
-        }).catch(function (error) { console.log(error) })
+        }).catch((error) => { 
+          console.log(error)
+          this.$message.error('数据加载失败，请稍后重试')
+        })
         console.log('Received values of form: ', this.searchForm)
       }
-    },
-    up () {
-      let arr = this.res_form.sort(function (x, y) {
-        if (x.object_name < y.object_name) {
-          return -1
-        } else if (x.object_name > y.object_name) {
-          return 1
-        } else {
-          return 0
-        }
-      })
-    },
-    ars () {
-      let arr = this.res_form.sort(function (x, y) {
-        return y.object_name.localeCompare(x.object_name)
-      })
-      this.res_form = arr
     }
-  },
-
+  }
 }
-
 </script>
 
 <style scoped>
-/*  .image{*/
-/*    !*width: 250px;*!*/
-/*    !*height: 30%;*!*/
-
-/*    width: 150px;*/
-/*    height: 150px*/
-/*  }*/
-/*.el-row {margin-bottom: 20px; }*/
-/*.el-col {*/
-/*  border-radius: 4px;*/
-/*}*/
-/*.bg-purple-dark {*/
-/*  background: #99a9bf;*/
-/*}*/
-/*.bg-purple {*/
-/*  background: #d3dce6;*/
-/*}*/
-/*.bg-purple-light {*/
-/*  background: #e5e9f2;*/
-/*}*/
-/*.grid-content {*/
-/*  border-radius: 4px;*/
-/*  min-height: 36px;*/
-/*}*/
-/*.row-bg {*/
-/*  padding: 10px 0;*/
-/*  background-color: #f9fafc;*/
-/*}*/
-/*.el-header, .el-footer {*/
-/*  background-color: #B3C0D1;*/
-/*  color: #333;*/
-/*  text-align: center;*/
-/*  line-height: 60px;*/
-/*}*/
-
-/*.el-aside {*/
-/*  background-color: #D3DCE6;*/
-/*  color: #333;*/
-/*  text-align: center;*/
-/*  line-height: 200px;*/
-/*}*/
-
-/*.el-main {*/
-/*  background-color: #E9EEF3;*/
-/*  color: #333;*/
-/*  text-align: center;*/
-/*  line-height: 160px;*/
-/*}*/
-
-/*body > .el-container {*/
-/*  margin-bottom: 40px;*/
-/*}*/
-
-/*.el-container:nth-child(5) .el-aside,*/
-/*.el-container:nth-child(6) .el-aside {*/
-/*  line-height: 260px;*/
-/*}*/
-
-/*.el-container:nth-child(7) .el-aside {*/
-/*  line-height: 320px;*/
-/*}*/
-/*  body > .el-container {*/
-/*    margin-bottom: 40px;*/
-/*  }*/
-
-/*  .el-container:nth-child(5) .el-aside,*/
-/*  .el-container:nth-child(6) .el-aside {*/
-/*    line-height: 260px;*/
-/*  }*/
-
-/*  .el-container:nth-child(7) .el-aside {*/
-/*    line-height: 320px;*/
-/*  }*/
-/*  .time {*/
-/*    font-size: 13px;*/
-/*    color: #999;*/
-/*  }*/
-
-/*  .bottom {*/
-/*    margin-top: 13px;*/
-/*    line-height: 12px;*/
-/*  }*/
-
-/*  .button {*/
-/*    padding: 0;*/
-/*    float: right;*/
-/*  }*/
-
-/*  .image {*/
-/*    width: 100%;*/
-/*    display: block;*/
-/*  }*/
-
-/*  .clearfix:before,*/
-/*  .clearfix:after {*/
-/*    display: table;*/
-/*    content: "";*/
-/*  }*/
-
-/*  .clearfix:after {*/
-/*    clear: both*/
-/*  }*/
-.vert{
-  padding: 0px;
-  width: 300px;
-  height: 400px;
-  justify-content: space-around;
-}
-.image{
-  /*width: 250px;*/
-  /*height: 30%;*/
-  width: 150px;
-  height: 150px
-}
-.el-row {margin-bottom: 20px; }
-.el-col {
-  border-radius: 4px;
-}
-.bg-purple-dark {
-  background: #99a9bf;
-}
-.bg-purple {
-  background: #d3dce6;
+/* 对比导航栏 */
+.compare-nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 10px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.grid-content {
-  border-radius: 4px;
-  min-height: 36px;
+.compare-nav-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: white;
+  margin: 0;
 }
-.row-bg {
-  padding: 10px 0;
-  background-color: #f9fafc;
+
+.compare-nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.el-header, .el-footer {
-  background-color: #B3C0D1;
-  color: #333;
+
+.compare-nav-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.compare-nav-info i {
+  font-size: 24px;
+}
+
+.compare-nav-info strong {
+  color: #ffd700;
+}
+
+.compare-nav-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* 筛选页面主体 */
+.filter-page {
+  min-height: calc(100vh - 180px);
+  padding: 40px 5%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* 筛选容器 */
+.filter-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 筛选头部 */
+.filter-header {
   text-align: center;
-  line-height: 60px;
+  margin-bottom: 30px;
 }
 
-.el-aside {
-  background-color: #D3DCE6;
-  color: #333;
-  text-align: center;
-  line-height: 200px;
+.filter-title {
+  font-family: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+  font-size: 36px;
+  font-weight: 400;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 10px 0;
+  letter-spacing: 8px;
 }
 
-.el-main {
-  background-color: #E9EEF3;
-  color: #333;
-  text-align: center;
-  line-height: 160px;
+.filter-desc {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
 }
 
-body > .el-container {
-  margin-bottom: 40px;
+/* 筛选卡片 */
+.filter-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.el-container:nth-child(5) .el-aside,
-.el-container:nth-child(6) .el-aside {
-  line-height: 260px;
+/* 单选框网格 */
+.radio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
 }
 
-.el-container:nth-child(7) .el-aside {
-  line-height: 320px;
-}
-body > .el-container {
-  margin-bottom: 40px;
-}
-
-.el-container:nth-child(5) .el-aside,
-.el-container:nth-child(6) .el-aside {
-  line-height: 260px;
-}
-
-.el-container:nth-child(7) .el-aside {
-  line-height: 320px;
-}
-.time {
-  font-size: 13px;
-  color: #999;
-}
-
-.bottom {
-  margin-top: 13px;
-  line-height: 12px;
-}
-
-.button {
-  padding: 0;
-  float: right;
-}
-
-.image {
-  width: 100%;
-  display: block;
+.radio-grid .el-radio {
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+  }
+  
+  &.is-checked {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    
+    .el-radio__label {
+      color: #fff;
+    }
+    
+    .el-radio__inner {
+      border-color: #0f3460;
+      background: #fff;
+    }
+    
+    .el-radio__input.is-checked .el-radio__inner::after {
+      background: #0f3460;
+    }
+  }
 }
 
-.clearfix:before,
-.clearfix:after {
-  display: table;
-  content: "";
+/* 筛选操作按钮 */
+.filter-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 
-.clearfix:after {
-  clear: both
+.filter-actions .el-button {
+  padding: 12px 30px;
+  border-radius: 8px;
+}
+
+.filter-actions .el-button--primary {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border: none;
+}
+
+/* 结果容器 */
+.result-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 返回按钮包装 */
+.back-button-wrapper {
+  margin-bottom: 20px;
+}
+
+.back-button-wrapper .el-button {
+  padding: 10px 25px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border: none;
 }
 </style>

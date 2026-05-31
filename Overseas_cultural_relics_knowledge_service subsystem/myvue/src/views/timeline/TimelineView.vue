@@ -2,230 +2,215 @@
   <div class="timeline-container">
     <MainHeader></MainHeader>
     
-    <el-container>
-      <el-main>
-        <div class="filter-section">
-          <el-card class="filter-card">
-            <div class="filter-header">
-              <span class="filter-title">文物时间轴筛选</span>
+    <div class="page-hero">
+      <div class="hero-content">
+        <h1 class="hero-title">文物历史时间轴</h1>
+        <p class="hero-desc">纵览千年文明脉络，追溯海外文物历史足迹</p>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="filter-section">
+        <div class="filter-card">
+          <div class="filter-row">
+            <div class="filter-item">
+              <span class="filter-label">按朝代筛选</span>
+              <el-select 
+                v-model="selectedDynasty" 
+                placeholder="请选择朝代"
+                class="filter-select"
+              >
+                <el-option label="全部朝代" value="all"></el-option>
+                <el-option 
+                  v-for="dynasty in dynasties" 
+                  :key="dynasty.value" 
+                  :label="dynasty.label" 
+                  :value="dynasty.value"
+                ></el-option>
+              </el-select>
             </div>
             
-            <el-row :gutter="20">
-              <el-col :span="8">
-                <div class="filter-item">
-                  <span class="filter-label">按朝代筛选：</span>
-                  <el-select 
-                    v-model="selectedDynasty" 
-                    placeholder="请选择朝代"
-                    class="filter-select"
-                  >
-                    <el-option label="全部朝代" value="all"></el-option>
-                    <el-option 
-                      v-for="dynasty in dynasties" 
-                      :key="dynasty.value" 
-                      :label="dynasty.label" 
-                      :value="dynasty.value"
-                    ></el-option>
-                  </el-select>
-                </div>
-              </el-col>
-              
-              <el-col :span="16">
-                <div class="filter-item">
-                  <span class="filter-label">自定义年份：</span>
-                  <el-input-number 
-                    v-model="startYear" 
-                    :min="-3000" 
-                    :max="2025" 
-                    placeholder="起始年份"
-                    controls-position="right"
-                    class="year-input"
-                  ></el-input-number>
-                  <span class="year-separator">至</span>
-                  <el-input-number 
-                    v-model="endYear" 
-                    :min="-3000" 
-                    :max="2025" 
-                    placeholder="结束年份"
-                    controls-position="right"
-                    class="year-input"
-                  ></el-input-number>
-                  <el-button type="primary" @click="applyTimeFilter" class="apply-btn">
-                    应用筛选
-                  </el-button>
-                  <el-button @click="resetFilter" class="reset-btn">
-                    重置
-                  </el-button>
-                </div>
-              </el-col>
-            </el-row>
-          </el-card>
+            <div class="filter-divider"></div>
+
+            <div class="filter-item">
+              <span class="filter-label">自定义年份</span>
+              <el-input-number 
+                v-model="startYear" 
+                :min="-3000" 
+                :max="2025" 
+                placeholder="起始年份"
+                controls-position="right"
+                class="year-input"
+              ></el-input-number>
+              <span class="year-separator">—</span>
+              <el-input-number 
+                v-model="endYear" 
+                :min="-3000" 
+                :max="2025" 
+                placeholder="结束年份"
+                controls-position="right"
+                class="year-input"
+              ></el-input-number>
+            </div>
+
+            <div class="filter-actions">
+              <el-button type="primary" @click="applyTimeFilter" class="apply-btn">
+                <i class="el-icon-search"></i> 应用筛选
+              </el-button>
+              <el-button @click="resetFilter" class="reset-btn">
+                <i class="el-icon-refresh"></i> 重置
+              </el-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-overview">
+        <div class="stat-card stat-card-1">
+          <div class="stat-bg-icon"><i class="el-icon-trophy"></i></div>
+          <div class="stat-content">
+            <div class="stat-number">{{ filteredTotal }}</div>
+            <div class="stat-desc">筛选文物数</div>
+          </div>
+        </div>
+        <div class="stat-card stat-card-2">
+          <div class="stat-bg-icon"><i class="el-icon-date"></i></div>
+          <div class="stat-content">
+            <div class="stat-number">{{ filteredPeriods }}</div>
+            <div class="stat-desc">历史时期</div>
+          </div>
+        </div>
+        <div class="stat-card stat-card-3">
+          <div class="stat-bg-icon"><i class="el-icon-office-building"></i></div>
+          <div class="stat-content">
+            <div class="stat-number">{{ museumsCount }}</div>
+            <div class="stat-desc">馆藏机构</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-card">
+        <div class="timeline-header">
+          <div class="card-title-group">
+            <span class="card-icon"></span>
+            <span class="timeline-title">海外文物历史时间轴</span>
+          </div>
+          <span class="timeline-subtitle">点击时间节点查看对应文物</span>
         </div>
 
-        <div class="stats-section">
-          <el-row :gutter="20">
-            <el-col :span="8">
-              <el-card class="stat-card">
-                <div class="stat-icon stat-icon-blue">
+        <div class="horizontal-timeline" v-if="filteredTimelineData.length > 0">
+          <div class="timeline-segments" ref="timelineTrack">
+            <div
+              v-for="(node, index) in displayTimelineData"
+              :key="node.id"
+              class="timeline-segment"
+              :class="{ active: selectedNode === node.id }"
+              :style="{ width: node.segmentWidth + '%', backgroundColor: getEraColor(node.startYear) }"
+              @click="handleNodeClick(node)"
+            >
+              <el-tooltip placement="top" effect="dark" :open-delay="200">
+                <template #content>
+                  <div class="tooltip-content">
+                    <div class="tooltip-title">{{ node.dynastyCn }}</div>
+                    <div class="tooltip-year">{{ formatYear(node.startYear) }} ~ {{ formatYear(node.endYear) }}</div>
+                    <div class="tooltip-count">{{ node.count }} 件文物</div>
+                    <div class="tooltip-hint">点击查看文物列表</div>
+                  </div>
+                </template>
+                <div class="segment-inner">
+                  <div class="segment-dot" :class="{ 'dot-large': node.count > avgCount }">
+                    <span class="dot-count" v-if="node.count > 0">{{ node.count }}</span>
+                  </div>
+                  <div class="segment-label">
+                    <div class="segment-name">{{ node.dynastyCn }}</div>
+                    <div class="segment-year" v-if="node.segmentWidth > 4">{{ formatYear(node.startYear) }}~{{ formatYear(node.endYear) }}</div>
+                  </div>
+                </div>
+              </el-tooltip>
+            </div>
+          </div>
+          <div class="timeline-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#5B8FF9"></span>远古~先秦</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#5AD8A6"></span>秦汉</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#F6BD16"></span>魏晋南北朝</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#E86452"></span>隋唐五代</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#6DC8EC"></span>宋元</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#945FB9"></span>明清~近代</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#C0C4CC"></span>未知朝代</span>
+          </div>
+        </div>
+
+        <div class="no-data" v-else>
+          <i class="el-icon-warning-outline"></i>
+          <span>没有符合条件的文物数据</span>
+        </div>
+
+        <div class="timeline-detail-list" v-if="filteredTimelineData.length > 0">
+          <div 
+            v-for="(node, index) in filteredTimelineData" 
+            :key="'detail-' + node.id"
+            class="detail-item"
+            :class="{ active: selectedNode === node.id }"
+            @click="handleNodeClick(node)"
+          >
+            <div class="detail-line-wrapper">
+              <div class="detail-dot" :style="{ background: getEraColor(node.startYear) }"></div>
+              <div class="detail-connector" v-if="index < filteredTimelineData.length - 1"></div>
+            </div>
+            <div class="detail-card">
+              <div class="detail-card-header">
+                <span class="detail-dynasty">{{ node.dynastyCn }}</span>
+                <span class="detail-year">{{ formatYear(node.startYear) }} ~ {{ formatYear(node.endYear) }}</span>
+              </div>
+              <div class="detail-card-body">
+                <div class="detail-count">
                   <i class="el-icon-trophy"></i>
-                </div>
-                <div class="stat-info">
-                  <div class="stat-value">{{ filteredTotal }}</div>
-                  <div class="stat-label">筛选文物数</div>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :span="8">
-              <el-card class="stat-card">
-                <div class="stat-icon stat-icon-green">
-                  <i class="el-icon-date"></i>
-                </div>
-                <div class="stat-info">
-                  <div class="stat-value">{{ filteredPeriods }}</div>
-                  <div class="stat-label">历史时期</div>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :span="8">
-              <el-card class="stat-card">
-                <div class="stat-icon stat-icon-orange">
-                  <i class="el-icon-office-building"></i>
-                </div>
-                <div class="stat-info">
-                  <div class="stat-value">{{ museumsCount }}</div>
-                  <div class="stat-label">馆藏机构</div>
-                </div>
-              </el-card>
-            </el-col>
-          </el-row>
-        </div>
-
-        <div class="timeline-section">
-          <el-card class="timeline-card">
-            <div class="timeline-header">
-              <span class="timeline-title">海外文物历史时间轴</span>
-              <span class="timeline-subtitle">点击时间节点查看对应文物</span>
-            </div>
-
-            <div class="horizontal-timeline" v-if="filteredTimelineData.length > 0">
-              <div class="timeline-segments" ref="timelineTrack">
-                <div
-                  v-for="(node, index) in displayTimelineData"
-                  :key="node.id"
-                  class="timeline-segment"
-                  :class="{ active: selectedNode === node.id }"
-                  :style="{ width: node.segmentWidth + '%', backgroundColor: getEraColor(node.startYear) }"
-                  @click="handleNodeClick(node)"
-                >
-                  <el-tooltip placement="top" effect="dark" :open-delay="200">
-                    <template #content>
-                      <div class="tooltip-content">
-                        <div class="tooltip-title">{{ node.dynastyCn }}</div>
-                        <div class="tooltip-year">{{ formatYear(node.startYear) }} ~ {{ formatYear(node.endYear) }}</div>
-                        <div class="tooltip-count">{{ node.count }} 件文物</div>
-                        <div class="tooltip-hint">点击查看文物列表</div>
-                      </div>
-                    </template>
-                    <div class="segment-inner">
-                      <div class="segment-dot" :class="{ 'dot-large': node.count > avgCount }">
-                        <span class="dot-count" v-if="node.count > 0">{{ node.count }}</span>
-                      </div>
-                      <div class="segment-label">
-                        <div class="segment-name">{{ node.dynastyCn }}</div>
-                        <div class="segment-year" v-if="node.segmentWidth > 4">{{ formatYear(node.startYear) }}~{{ formatYear(node.endYear) }}</div>
-                      </div>
-                    </div>
-                  </el-tooltip>
+                  <span>{{ node.count }} 件文物</span>
                 </div>
               </div>
-              <div class="timeline-legend">
-                <span class="legend-item"><span class="legend-dot" style="background:#5B8FF9"></span>远古~先秦</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#5AD8A6"></span>秦汉</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#F6BD16"></span>魏晋南北朝</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#E86452"></span>隋唐五代</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#6DC8EC"></span>宋元</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#945FB9"></span>明清~近代</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#C0C4CC"></span>未知朝代</span>
+              <div class="detail-card-action">
+                <span>查看文物列表 <i class="el-icon-arrow-right"></i></span>
               </div>
             </div>
-
-            <div class="no-data" v-else>
-              <i class="el-icon-warning-outline"></i>
-              <span>没有符合条件的文物数据</span>
-            </div>
-
-            <div class="timeline-detail-list" v-if="filteredTimelineData.length > 0">
-              <div 
-                v-for="(node, index) in filteredTimelineData" 
-                :key="'detail-' + node.id"
-                class="detail-item"
-                :class="{ active: selectedNode === node.id }"
-                @click="handleNodeClick(node)"
-              >
-                <div class="detail-line-wrapper">
-                  <div class="detail-dot" :class="{ 'dot-highlight': node.count > avgCount }"></div>
-                  <div class="detail-connector" v-if="index < filteredTimelineData.length - 1"></div>
-                </div>
-                <div class="detail-card">
-                  <div class="detail-card-header">
-                    <span class="detail-dynasty">{{ node.dynastyCn }}</span>
-                    <span class="detail-year">{{ formatYear(node.startYear) }} ~ {{ formatYear(node.endYear) }}</span>
-                  </div>
-                  <div class="detail-card-body">
-                    <div class="detail-count">
-                      <i class="el-icon-trophy"></i>
-                      <span>{{ node.count }} 件文物</span>
-                    </div>
-                    <div class="detail-thumbnail" v-if="node.thumbnail">
-                      <img :src="node.thumbnail" :alt="node.dynastyCn">
-                    </div>
-                  </div>
-                  <div class="detail-card-action">
-                    <span>查看文物列表 <i class="el-icon-arrow-right"></i></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </el-card>
-        </div>
-
-        <el-dialog 
-          :title="'文物列表 - ' + currentPeriod" 
-          :visible.sync="showAntiqueList"
-          width="80%"
-          top="5vh"
-        >
-          <div class="antique-list-header">
-            <span class="antique-list-count">共 {{ currentAntiques.length }} 件文物</span>
           </div>
-          <div class="antique-list">
-            <el-row :gutter="16">
-              <el-col 
-                v-for="antique in currentAntiques" 
-                :key="antique.objectId" 
-                :span="6"
-              >
-                <router-link :to="{ path: '/antiqueDetail', query: { id: antique.objectId } }" class="antique-link">
-                  <el-card class="antique-card" :body-style="{ padding: '0' }">
-                    <div class="antique-img-wrapper">
-                      <img :src="antique.imageUrl" :alt="antique.title" class="antique-img" v-if="antique.imageUrl">
-                      <div class="antique-img-placeholder" v-else>
-                        <i class="el-icon-picture-outline"></i>
-                      </div>
-                    </div>
-                    <div class="antique-info">
-                      <div class="antique-name" :title="antique.title">{{ antique.title }}</div>
-                      <div class="antique-museum">{{ antique.museum }}</div>
-                    </div>
-                  </el-card>
-                </router-link>
-              </el-col>
-            </el-row>
-          </div>
-        </el-dialog>
-      </el-main>
-    </el-container>
-    
+        </div>
+      </div>
+    </div>
+
+    <el-dialog 
+      :title="'文物列表 - ' + currentPeriod" 
+      v-model="showAntiqueList"
+      width="80%"
+      top="5vh"
+      class="antique-dialog"
+    >
+      <div class="antique-list-header">
+        <span class="antique-list-count">展示 {{ currentAntiques.length }} 件文物（共 {{ currentAntiquesTotal }} 件）</span>
+      </div>
+      <div class="antique-list">
+        <el-row :gutter="16">
+          <el-col 
+            v-for="antique in currentAntiques" 
+            :key="antique.objectId" 
+            :span="6"
+          >
+            <el-card class="antique-card" :body-style="{ padding: '0' }" @click="goToDetail(antique)">
+              <div class="antique-img-wrapper">
+                <img :src="getValidImageUrl(antique.imageUrl)" :alt="antique.title" class="antique-img" v-if="getValidImageUrl(antique.imageUrl)">
+                <div class="antique-img-placeholder" v-else>
+                  <i class="el-icon-picture-outline"></i>
+                </div>
+              </div>
+              <div class="antique-info">
+                <div class="antique-name" :title="antique.title">{{ antique.title }}</div>
+                <div class="antique-museum">{{ antique.museum }}</div>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+      </div>
+    </el-dialog>
+
     <MainFooter></MainFooter>
   </div>
 </template>
@@ -252,6 +237,7 @@ export default {
       showAntiqueList: false,
       currentPeriod: '',
       currentAntiques: [],
+      currentAntiquesTotal: 0,
       totalAntiques: 0,
       filteredPeriods: 0,
       museumsCount: 0
@@ -385,12 +371,22 @@ export default {
           startYear: item.startYear || 0,
           endYear: item.endYear || 0,
           count: item.count || 0,
-          thumbnail: item.antiques && item.antiques.length > 0
-            ? (item.antiques[0].imageUrl || '')
-            : '',
           antiques: item.antiques || []
         }
       })
+    },
+
+    getValidImageUrl (imageUrl) {
+      if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') {
+        return ''
+      }
+      if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+        return ''
+      }
+      if (imageUrl.includes(',')) {
+        return imageUrl.split(',')[0]
+      }
+      return imageUrl
     },
 
     getEraColor (startYear) {
@@ -428,7 +424,19 @@ export default {
       this.selectedNode = node.id
       this.currentPeriod = node.period
       this.currentAntiques = node.antiques
+      this.currentAntiquesTotal = node.count
       this.showAntiqueList = true
+    },
+
+    goToDetail (antique) {
+      this.showAntiqueList = false
+      this.$router.push({
+        path: '/antiqueDetail',
+        query: {
+          museum_id: antique.museumId,
+          object_id: antique.objectId
+        }
+      })
     }
   }
 }
@@ -440,102 +448,203 @@ export default {
   background: #f5f7fa;
 }
 
+.page-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 28px 5% 22px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(102,126,234,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: 10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(118,75,162,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: 2px;
+}
+
+.hero-desc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+}
+
+.page-body {
+  padding: 30px 5% 40px;
+  margin-top: -20px;
+  position: relative;
+  z-index: 2;
+}
+
 .filter-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .filter-card {
-  padding: 20px;
   background: #fff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border-radius: 8px;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
-.filter-header {
-  margin-bottom: 20px;
-}
-
-.filter-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .filter-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .filter-label {
   font-size: 14px;
   color: #606266;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .filter-select {
-  width: 200px;
+  width: 180px;
 }
 
 .year-input {
-  width: 140px;
+  width: 130px;
 }
 
 .year-separator {
   font-size: 14px;
-  color: #909399;
+  color: #c0c4cc;
+}
+
+.filter-divider {
+  width: 1px;
+  height: 30px;
+  background: #ebeef5;
+}
+
+.filter-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
 }
 
 .apply-btn {
-  padding: 0 24px;
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0 24px !important;
 }
 
 .reset-btn {
-  padding: 0 24px;
+  border-radius: 8px !important;
+  padding: 0 24px !important;
 }
 
-.stats-section {
-  margin-bottom: 20px;
+.stats-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
+  border-radius: 16px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: none;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
 }
 
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  margin-right: 16px;
+.stat-bg-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 60px;
+  opacity: 0.06;
 }
 
-.stat-icon-blue { background: #ecf5ff; color: #409eff; }
-.stat-icon-green { background: #f0f9eb; color: #67c23a; }
-.stat-icon-orange { background: #fdf6ec; color: #e6a23c; }
+.stat-card-1 {
+  background: linear-gradient(135deg, #1e2a4a 0%, #2c3e6b 100%);
+  box-shadow: 0 4px 20px rgba(30, 42, 74, 0.3);
+  .stat-number, .stat-desc, .stat-bg-icon i { color: #fff; }
+  .stat-desc { opacity: 0.75; }
+}
 
-.stat-info { color: #303133; }
-.stat-value { font-size: 24px; font-weight: 600; }
-.stat-label { font-size: 12px; color: #909399; margin-top: 4px; }
+.stat-card-2 {
+  background: linear-gradient(135deg, #1a3a4a 0%, #2c5060 100%);
+  box-shadow: 0 4px 20px rgba(26, 58, 74, 0.3);
+  .stat-number, .stat-desc, .stat-bg-icon i { color: #fff; }
+  .stat-desc { opacity: 0.75; }
+}
 
-.timeline-section {
-  margin-bottom: 20px;
+.stat-card-3 {
+  background: linear-gradient(135deg, #3a1a2e 0%, #5a2a42 100%);
+  box-shadow: 0 4px 20px rgba(58, 26, 46, 0.3);
+  .stat-number, .stat-desc, .stat-bg-icon i { color: #fff; }
+  .stat-desc { opacity: 0.75; }
+}
+
+.stat-content {
+  position: relative;
+  z-index: 1;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-desc {
+  font-size: 14px;
+  margin-top: 4px;
 }
 
 .timeline-card {
-  padding: 24px;
   background: #fff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border-radius: 8px;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 .timeline-header {
@@ -545,6 +654,19 @@ export default {
   margin-bottom: 24px;
 }
 
+.card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-icon {
+  width: 8px;
+  height: 24px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
 .timeline-title {
   font-size: 18px;
   font-weight: 600;
@@ -552,14 +674,14 @@ export default {
 }
 
 .timeline-subtitle {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
 }
 
 .horizontal-timeline {
   padding: 20px 0 10px;
   margin-bottom: 30px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #f0f0f0;
   padding-bottom: 20px;
   overflow-x: auto;
 }
@@ -569,9 +691,9 @@ export default {
   width: 100%;
   min-width: 900px;
   height: 80px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .timeline-segment {
@@ -674,7 +796,7 @@ export default {
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-size: 12px;
   color: #606266;
 }
@@ -709,7 +831,7 @@ export default {
 
 .tooltip-hint {
   font-size: 11px;
-  color: #409eff;
+  color: #667eea;
   margin-top: 2px;
 }
 
@@ -726,13 +848,13 @@ export default {
   transition: all 0.2s ease;
 
   &:hover .detail-card {
-    border-color: #409eff;
-    box-shadow: 0 4px 16px rgba(64, 158, 255, 0.15);
+    border-color: #667eea;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
   }
 
   &.active .detail-card {
-    border-color: #409eff;
-    background: #ecf5ff;
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03));
   }
 }
 
@@ -748,21 +870,15 @@ export default {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #409eff;
-  border: 3px solid #d9ecff;
+  border: 3px solid rgba(102, 126, 234, 0.2);
   flex-shrink: 0;
   z-index: 1;
-
-  &.dot-highlight {
-    background: #e6a23c;
-    border-color: #faecd8;
-  }
 }
 
 .detail-connector {
   width: 2px;
   flex: 1;
-  background: #dcdfe6;
+  background: #ebeef5;
   min-height: 20px;
 }
 
@@ -770,8 +886,8 @@ export default {
   flex: 1;
   margin: 0 0 16px 16px;
   padding: 16px 20px;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
   background: #fafafa;
   transition: all 0.3s ease;
 }
@@ -805,28 +921,16 @@ export default {
   color: #606266;
 
   i {
-    color: #e6a23c;
+    color: #667eea;
     margin-right: 6px;
-  }
-}
-
-.detail-thumbnail {
-  width: 50px;
-  height: 50px;
-  border-radius: 6px;
-  overflow: hidden;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 }
 
 .detail-card-action {
   margin-top: 10px;
   font-size: 13px;
-  color: #409eff;
+  color: #667eea;
+  font-weight: 500;
 
   i {
     margin-left: 4px;
@@ -853,7 +957,7 @@ export default {
 
 .antique-list-header {
   padding: 0 10px 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #f0f0f0;
   margin-bottom: 16px;
 }
 
@@ -869,23 +973,18 @@ export default {
   padding: 0 10px;
 }
 
-.antique-link {
-  text-decoration: none;
-  display: block;
-}
-
 .antique-card {
   margin-bottom: 16px;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 8px;
+  transition: all 0.3s ease;
+  border-radius: 12px;
   overflow: hidden;
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
   }
 }
 
@@ -900,6 +999,11 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.antique-card:hover .antique-img {
+  transform: scale(1.05);
 }
 
 .antique-img-placeholder {
@@ -913,7 +1017,7 @@ export default {
 }
 
 .antique-info {
-  padding: 10px 12px;
+  padding: 12px 14px;
 }
 
 .antique-name {

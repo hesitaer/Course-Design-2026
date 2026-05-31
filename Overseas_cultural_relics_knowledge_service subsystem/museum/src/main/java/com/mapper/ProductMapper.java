@@ -55,4 +55,20 @@ public interface ProductMapper {
     Integer countNoDynasty();
 
     List<Product> findNoDynasty();
+
+    List<Product> findByPage(@Param("params") Map<String, Object> params, 
+                              @Param("offset") Integer offset, 
+                              @Param("limit") Integer limit);
+    
+    Integer countByParams(@Param("params") Map<String, Object> params);
+    
+    List<Product> findByIds(@Param("ids") List<String> ids);
+    
+    List<String> getAllTypes();
+    
+    List<String> getAllDynasties();
+    
+    List<String> getAllMuseums();
+    
+    List<String> getAllMaterials();
 }

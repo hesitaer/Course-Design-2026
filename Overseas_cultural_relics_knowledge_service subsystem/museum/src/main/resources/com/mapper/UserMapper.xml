@@ -7,28 +7,41 @@
         select * from user where user_id = #{user_id}
     </select>
 
+    <select id = "findByUsername" resultType = "com.entity.User">
+        select * from user where username = #{username}
+    </select>
+
     <select id = "findByUser_password" resultType = "com.entity.User">
-        select * from user where user_id = #{user_id} and user_password = #{user_password}
+        select * from user where user_id = #{user_id} and password = #{password}
     </select>
 
     <insert id="insert_user" useGeneratedKeys="true" keyProperty="user_id">
-    insert into user(user_name,user_password,user_sex,user_tel,user_comment,user_login)
-    values (#{user_name},#{user_password},#{user_sex},#{user_tel},#{user_comment},#{user_login});
+        insert into user(username, password, sex, phone, user_source, status, register_time, created_at, updated_at)
+        values (#{username}, #{password}, #{sex}, #{phone}, 'web', #{status}, NOW(), NOW(), NOW());
     </insert>
 
     <update id="update">
-    update user
-    set user_password = #{user_password},user_name = #{user_name},
-    user_sex = #{user_sex},user_tel = #{user_tel}
-    where user_id=#{user_id}
+        update user
+        set password = #{password},
+            username = #{username},
+            nickname = #{nickname},
+            avatar_url = #{avatar_url},
+            sex = #{sex},
+            email = #{email},
+            phone = #{phone},
+            updated_at = NOW()
+        where user_id = #{user_id}
+    </update>
+
+    <update id="updateLastLogin">
+        update user
+        set last_login_at = NOW(),
+            last_login_ip = #{ip}
+        where user_id = #{user_id}
     </update>
 
     <delete id="delete">
         delete from user
         where user_id = #{user_id};
     </delete>
-
-    <select id="findByUser_name" resultType = "com.entity.User">
-        select * from user where user_name = #{user_name}
-    </select>
 </mapper>

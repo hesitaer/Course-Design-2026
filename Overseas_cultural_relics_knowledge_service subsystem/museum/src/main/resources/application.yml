@@ -5,15 +5,20 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     username: remote_user
     password: '!software2303'
+  web:
+    resources:
+      static-locations: classpath:/static/,file:uploads/
   neo4j:
-    uri: bolt://10.4.17.244:7687
+    uri: bolt://47.96.152.190:7687
     authentication:
       username: neo4j
-      password: password123
+      password: "!software2303"
 
 mybatis:
   mapper-locations: classpath*:com/mapper/*.xml
   type-aliases-package: com.mapper
+  configuration:
+    map-underscore-to-camel-case: false
 
 server:
   port: 8085

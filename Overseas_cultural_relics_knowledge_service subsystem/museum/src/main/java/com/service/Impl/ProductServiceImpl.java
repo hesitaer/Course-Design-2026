@@ -1,6 +1,5 @@
 package com.service.Impl;
 
-import com.entity.Cart;
 import com.entity.Product;
 import com.entity.StatisticsDTO;
 import com.entity.TimelineDTO;
@@ -11,7 +10,6 @@ import com.service.exception.ProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,7 +29,6 @@ public class ProductServiceImpl implements IProductService {
         if(product.getImageUrl() != null) {
             String[] address = product.getImageUrl().split(",");
             product.setImageUrl(address[0]);
-            product.setImageUrl(findImageMapper.findImage(product.getImageUrl()));
         }
         return product;
     }
@@ -181,7 +178,7 @@ public class ProductServiceImpl implements IProductService {
                     }
                 }
                 antiques.add(new TimelineDTO.AntiqueBrief(
-                    p.getObjectId(), p.getTitle(), p.getMuseum(), img
+                    p.getObjectId(), p.getMuseumId(), p.getTitle(), p.getMuseum(), img
                 ));
             }
             item.setAntiques(antiques);
@@ -203,7 +200,7 @@ public class ProductServiceImpl implements IProductService {
                     }
                 }
                 noDynastyAntiques.add(new TimelineDTO.AntiqueBrief(
-                    p.getObjectId(), p.getTitle(), p.getMuseum(), img
+                    p.getObjectId(), p.getMuseumId(), p.getTitle(), p.getMuseum(), img
                 ));
             }
             TimelineDTO.TimelineItem unknownItem = new TimelineDTO.TimelineItem(
@@ -226,5 +223,55 @@ public class ProductServiceImpl implements IProductService {
             result.add(new StatisticsDTO.NameValueItem(name, value));
         }
         return result;
+    }
+
+    @Override
+    public List<Product> findByPage(Map<String, Object> params, Integer pageNum, Integer pageSize) {
+        Integer offset = (pageNum - 1) * pageSize;
+        List<Product> products = productMapper.findByPage(params, offset, pageSize);
+        for (Product product : products) {
+            if (product.getImageUrl() != null) {
+                String[] address = product.getImageUrl().split(",");
+                product.setImageUrl(address[0]);
+            }
+        }
+        return products;
+    }
+
+    @Override
+    public Integer countByParams(Map<String, Object> params) {
+        return productMapper.countByParams(params);
+    }
+
+    @Override
+    public List<Product> findByIds(List<String> ids) {
+        List<Product> products = productMapper.findByIds(ids);
+        for (Product product : products) {
+            if (product.getImageUrl() != null) {
+                String[] address = product.getImageUrl().split(",");
+                product.setImageUrl(address[0]);
+            }
+        }
+        return products;
+    }
+
+    @Override
+    public List<String> getAllTypes() {
+        return productMapper.getAllTypes();
+    }
+
+    @Override
+    public List<String> getAllDynasties() {
+        return productMapper.getAllDynasties();
+    }
+
+    @Override
+    public List<String> getAllMuseums() {
+        return productMapper.getAllMuseums();
+    }
+
+    @Override
+    public List<String> getAllMaterials() {
+        return productMapper.getAllMaterials();
     }
 }

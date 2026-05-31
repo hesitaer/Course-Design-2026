@@ -3,6 +3,7 @@ package com.entity;
 import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class KnowledgeGraphDTO implements Serializable {
@@ -12,6 +13,8 @@ public class KnowledgeGraphDTO implements Serializable {
     private List<GraphNode> nodes;
 
     private List<GraphEdge> edges;
+
+    private Map<String, Long> categoryCounts;
 
     @Data
     public static class GraphNode implements Serializable {
@@ -43,29 +46,32 @@ public class KnowledgeGraphDTO implements Serializable {
 
         private Integer calculateSize(String category) {
             switch (category) {
-                case "relic": return 60;
-                case "artist": return 45;
-                case "dynasty": return 40;
-                case "museum": return 35;
+                case "relic": return 50;
+                case "artist": return 40;
+                case "dynasty": return 38;
+                case "museum": return 36;
                 case "material": return 30;
                 case "type": return 30;
-                case "culture": return 30;
-                default: return 25;
+                case "location": return 28;
+                case "culture": return 28;
+                default: return 22;
             }
         }
 
         private Integer calculateSizeByCount(String category, int count) {
             int base;
             switch (category) {
-                case "dynasty": base = 30; break;
-                case "museum": base = 28; break;
-                case "material": base = 24; break;
-                case "type": base = 24; break;
-                case "relic": base = 40; break;
-                case "artist": base = 30; break;
-                default: base = 20; break;
+                case "museum": base = 30; break;
+                case "dynasty": base = 28; break;
+                case "artist": base = 26; break;
+                case "material": base = 22; break;
+                case "type": base = 22; break;
+                case "location": base = 20; break;
+                case "culture": base = 20; break;
+                case "relic": base = 35; break;
+                default: base = 18; break;
             }
-            return base + Math.min(count / 50, 40);
+            return base + Math.min(count / 20, 50);
         }
 
         private String calculateColor(String category) {
@@ -77,6 +83,7 @@ public class KnowledgeGraphDTO implements Serializable {
                 case "material": return "#98D8C8";
                 case "type": return "#C39BD3";
                 case "culture": return "#F7DC6F";
+                case "location": return "#85C1E9";
                 default: return "#BBBBBB";
             }
         }

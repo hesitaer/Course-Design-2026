@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>我的收藏</h2>
+    <h2>我的评论</h2>
     <br>
     <el-table
       :data="tableData"

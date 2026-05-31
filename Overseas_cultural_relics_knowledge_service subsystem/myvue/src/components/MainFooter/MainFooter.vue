@@ -44,7 +44,7 @@ export default {
   overflow: hidden;
   height: 180px;
   width: 100%;
-  background: #062e16ff;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   color: #ffffff;
   text-align: center;
   font-family: "微软雅黑";

@@ -2,159 +2,137 @@
   <div class="statistics-container">
     <MainHeader></MainHeader>
     
-    <el-container>
-      <el-main>
-        <div class="stats-overview">
-          <el-row :gutter="20">
-            <el-col :span="6">
-              <el-card class="stat-card stat-card-blue">
-                <div class="stat-icon-wrapper">
-                  <i class="el-icon-trophy"></i>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-number">{{ totalAntiques }}</div>
-                  <div class="stat-desc">文物总数</div>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :span="6">
-              <el-card class="stat-card stat-card-green">
-                <div class="stat-icon-wrapper">
-                  <i class="el-icon-collection"></i>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-number">{{ categoryCount }}</div>
-                  <div class="stat-desc">文物类型</div>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :span="6">
-              <el-card class="stat-card stat-card-orange">
-                <div class="stat-icon-wrapper">
-                  <i class="el-icon-office-building"></i>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-number">{{ museumCount }}</div>
-                  <div class="stat-desc">馆藏机构</div>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :span="6">
-              <el-card class="stat-card stat-card-purple">
-                <div class="stat-icon-wrapper">
-                  <i class="el-icon-date"></i>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-number">{{ dynastyCount }}</div>
-                  <div class="stat-desc">历史朝代</div>
-                </div>
-              </el-card>
-            </el-col>
-          </el-row>
+    <div class="page-hero">
+      <div class="hero-content">
+        <h1 class="hero-title">数据统计分析</h1>
+        <p class="hero-desc">全方位洞察海外文物收藏分布与历史脉络</p>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="stats-overview">
+        <div class="stat-card stat-card-1">
+          <div class="stat-bg-icon"><i class="el-icon-trophy"></i></div>
+          <div class="stat-content">
+            <div class="stat-number">{{ totalAntiques }}</div>
+            <div class="stat-desc">文物总数</div>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+        <div class="stat-card stat-card-2">
+          <div class="stat-bg-icon"><i class="el-icon-collection"></i></div>
+          <div class="stat-content">
+            <div class="stat-number">{{ categoryCount }}</div>
+            <div class="stat-desc">文物类型</div>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+        <div class="stat-card stat-card-3">
+          <div class="stat-bg-icon"><i class="el-icon-office-building"></i></div>
+          <div class="stat-content">
+            <div class="stat-number">{{ museumCount }}</div>
+            <div class="stat-desc">馆藏机构</div>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+        <div class="stat-card stat-card-4">
+          <div class="stat-bg-icon"><i class="el-icon-date"></i></div>
+          <div class="stat-content">
+            <div class="stat-number">{{ dynastyCount }}</div>
+            <div class="stat-desc">历史朝代</div>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card chart-card-full">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon icon-dynasty"></span>
+              <span class="card-title">朝代分布统计</span>
+            </div>
+            <el-select v-model="dynastyChartType" size="small" class="chart-type-select">
+              <el-option label="柱状图" value="bar"></el-option>
+              <el-option label="横向柱状" value="horizontalBar"></el-option>
+              <el-option label="饼图" value="pie"></el-option>
+              <el-option label="环形图" value="doughnut"></el-option>
+              <el-option label="玫瑰图" value="rose"></el-option>
+            </el-select>
+          </div>
+          <div ref="dynastyChart" class="chart-container chart-container-wide"></div>
         </div>
 
-        <div class="charts-grid">
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="card-header">
-                    <span class="card-title">朝代分布统计</span>
-                    <el-select v-model="dynastyChartType" size="small" style="width: 110px;">
-                      <el-option label="柱状图" value="bar"></el-option>
-                      <el-option label="横向柱状" value="horizontalBar"></el-option>
-                      <el-option label="饼图" value="pie"></el-option>
-                      <el-option label="环形图" value="doughnut"></el-option>
-                      <el-option label="玫瑰图" value="rose"></el-option>
-                    </el-select>
-                  </div>
-                </template>
-                <div ref="dynastyChart" class="chart-container chart-container-lg"></div>
-              </el-card>
-            </el-col>
-
-            <el-col :span="12">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="card-header">
-                    <span class="card-title">博物馆藏量排行</span>
-                    <el-select v-model="museumChartType" size="small" style="width: 110px;">
-                      <el-option label="横向柱状" value="horizontalBar"></el-option>
-                      <el-option label="柱状图" value="bar"></el-option>
-                      <el-option label="饼图" value="pie"></el-option>
-                      <el-option label="环形图" value="doughnut"></el-option>
-                      <el-option label="玫瑰图" value="rose"></el-option>
-                    </el-select>
-                  </div>
-                </template>
-                <div ref="museumChart" class="chart-container chart-container-lg"></div>
-              </el-card>
-            </el-col>
-          </el-row>
-
-          <el-row :gutter="20" style="margin-top: 20px;">
-            <el-col :span="24">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="card-header">
-                    <span class="card-title">文物类型占比</span>
-                    <el-select v-model="categoryChartType" size="small" style="width: 110px;">
-                      <el-option label="饼图" value="pie"></el-option>
-                      <el-option label="环形图" value="doughnut"></el-option>
-                      <el-option label="玫瑰图" value="rose"></el-option>
-                      <el-option label="柱状图" value="bar"></el-option>
-                      <el-option label="横向柱状" value="horizontalBar"></el-option>
-                    </el-select>
-                  </div>
-                </template>
-                <div ref="categoryChart" class="chart-container chart-container-wide"></div>
-              </el-card>
-            </el-col>
-          </el-row>
-
-          <el-row :gutter="20" style="margin-top: 20px;">
-            <el-col :span="24">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="card-header">
-                    <span class="card-title">文物材质分布</span>
-                    <el-select v-model="materialChartType" size="small" style="width: 110px;">
-                      <el-option label="饼图" value="pie"></el-option>
-                      <el-option label="环形图" value="doughnut"></el-option>
-                      <el-option label="玫瑰图" value="rose"></el-option>
-                      <el-option label="柱状图" value="bar"></el-option>
-                      <el-option label="横向柱状" value="horizontalBar"></el-option>
-                    </el-select>
-                  </div>
-                </template>
-                <div ref="materialChart" class="chart-container chart-container-wide"></div>
-              </el-card>
-            </el-col>
-          </el-row>
-
-          <el-row :gutter="20" style="margin-top: 20px;">
-            <el-col :span="12">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="card-header">
-                    <span class="card-title">海外藏地区域分布</span>
-                    <el-select v-model="regionChartType" size="small" style="width: 110px;">
-                      <el-option label="饼图" value="pie"></el-option>
-                      <el-option label="环形图" value="doughnut"></el-option>
-                      <el-option label="玫瑰图" value="rose"></el-option>
-                      <el-option label="柱状图" value="bar"></el-option>
-                      <el-option label="横向柱状" value="horizontalBar"></el-option>
-                    </el-select>
-                  </div>
-                </template>
-                <div ref="regionChart" class="chart-container chart-container-lg"></div>
-              </el-card>
-            </el-col>
-          </el-row>
+        <div class="chart-card chart-card-full">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon icon-type"></span>
+              <span class="card-title">文物类型占比</span>
+            </div>
+            <el-select v-model="categoryChartType" size="small" class="chart-type-select">
+              <el-option label="饼图" value="pie"></el-option>
+              <el-option label="环形图" value="doughnut"></el-option>
+              <el-option label="玫瑰图" value="rose"></el-option>
+              <el-option label="柱状图" value="bar"></el-option>
+              <el-option label="横向柱状" value="horizontalBar"></el-option>
+            </el-select>
+          </div>
+          <div ref="categoryChart" class="chart-container chart-container-wide"></div>
         </div>
-      </el-main>
-    </el-container>
-    
+
+        <div class="chart-card chart-card-full">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon icon-material"></span>
+              <span class="card-title">文物材质分布</span>
+            </div>
+            <el-select v-model="materialChartType" size="small" class="chart-type-select">
+              <el-option label="饼图" value="pie"></el-option>
+              <el-option label="环形图" value="doughnut"></el-option>
+              <el-option label="玫瑰图" value="rose"></el-option>
+              <el-option label="柱状图" value="bar"></el-option>
+              <el-option label="横向柱状" value="horizontalBar"></el-option>
+            </el-select>
+          </div>
+          <div ref="materialChart" class="chart-container chart-container-wide"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon icon-region"></span>
+              <span class="card-title">海外藏地区域分布</span>
+            </div>
+            <el-select v-model="regionChartType" size="small" class="chart-type-select">
+              <el-option label="饼图" value="pie"></el-option>
+              <el-option label="环形图" value="doughnut"></el-option>
+              <el-option label="玫瑰图" value="rose"></el-option>
+              <el-option label="柱状图" value="bar"></el-option>
+              <el-option label="横向柱状" value="horizontalBar"></el-option>
+            </el-select>
+          </div>
+          <div ref="regionChart" class="chart-container chart-container-lg"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon icon-museum"></span>
+              <span class="card-title">博物馆藏量排行</span>
+            </div>
+            <el-select v-model="museumChartType" size="small" class="chart-type-select">
+              <el-option label="横向柱状" value="horizontalBar"></el-option>
+              <el-option label="柱状图" value="bar"></el-option>
+              <el-option label="饼图" value="pie"></el-option>
+              <el-option label="环形图" value="doughnut"></el-option>
+              <el-option label="玫瑰图" value="rose"></el-option>
+            </el-select>
+          </div>
+          <div ref="museumChart" class="chart-container chart-container-lg"></div>
+        </div>
+      </div>
+    </div>
+
     <MainFooter></MainFooter>
   </div>
 </template>
@@ -165,7 +143,11 @@ import axios from 'axios'
 import MainHeader from '../../components/MainHeader/MainHeader'
 import MainFooter from '../../components/MainFooter/MainFooter'
 
-const COLORS = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#9b59b6', '#1abc9c', '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#8e44ad', '#16a085', '#d35400', '#2980b9', '#95a5a6']
+const COLORS = [
+  '#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a',
+  '#a18cd1', '#fbc2eb', '#fccb90', '#84fab0', '#8fd3f4', '#d4fc79',
+  '#96fbc4', '#f9f586', '#ff9a9e', '#fad0c4'
+]
 
 export default {
   name: 'StatisticsView',
@@ -255,8 +237,22 @@ export default {
 
     buildPieOption (data, chartType) {
       const base = {
-        tooltip: { trigger: 'item', formatter: '{b}: {c}件 ({d}%)' },
-        legend: { type: 'scroll', orient: 'vertical', right: '5%', top: 'middle', height: '80%' },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: {c}件 ({d}%)',
+          backgroundColor: 'rgba(26,26,46,0.9)',
+          borderColor: 'transparent',
+          textStyle: { color: '#fff', fontSize: 13 }
+        },
+        legend: {
+          type: 'scroll',
+          orient: 'vertical',
+          right: '5%',
+          top: 'middle',
+          height: '80%',
+          textStyle: { color: '#606266', fontSize: 12 },
+          pageTextStyle: { color: '#667eea' }
+        },
         color: COLORS
       }
       if (chartType === 'pie') {
@@ -265,9 +261,12 @@ export default {
           series: [{
             type: 'pie', radius: ['30%', '60%'], center: ['35%', '50%'],
             avoidLabelOverlap: true,
-            itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+            itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 3 },
             label: { show: false },
-            emphasis: { label: { show: true, fontSize: 13, fontWeight: 'bold' } },
+            emphasis: {
+              label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#303133' },
+              itemStyle: { shadowBlur: 20, shadowColor: 'rgba(102,126,234,0.3)' }
+            },
             data: data
           }]
         }
@@ -276,9 +275,12 @@ export default {
           ...base,
           series: [{
             type: 'pie', radius: ['45%', '65%'], center: ['35%', '50%'],
-            itemStyle: { borderRadius: 5, borderColor: '#fff', borderWidth: 2 },
+            itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 3 },
             label: { show: false },
-            emphasis: { label: { show: true, fontSize: 13, fontWeight: 'bold' } },
+            emphasis: {
+              label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#303133' },
+              itemStyle: { shadowBlur: 20, shadowColor: 'rgba(102,126,234,0.3)' }
+            },
             data: data
           }]
         }
@@ -287,9 +289,12 @@ export default {
           ...base,
           series: [{
             type: 'pie', radius: [20, 100], center: ['35%', '50%'], roseType: 'area',
-            itemStyle: { borderRadius: 8 },
+            itemStyle: { borderRadius: 10 },
             label: { show: false },
-            emphasis: { label: { show: true, fontSize: 13, fontWeight: 'bold' } },
+            emphasis: {
+              label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#303133' },
+              itemStyle: { shadowBlur: 20, shadowColor: 'rgba(102,126,234,0.3)' }
+            },
             data: [...data].sort((a, b) => a.value - b.value)
           }]
         }
@@ -300,52 +305,67 @@ export default {
       const fs = fontSize || 12
       if (chartType === 'bar') {
         return {
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(26,26,46,0.9)',
+            borderColor: 'transparent',
+            textStyle: { color: '#fff' }
+          },
           grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
           xAxis: {
             type: 'category', data: data.map(d => d.name),
             axisLabel: { rotate: 30, color: '#606266', fontSize: fs },
-            axisLine: { lineStyle: { color: '#dcdfe6' } }
+            axisLine: { lineStyle: { color: '#e0e0e0' } },
+            axisTick: { show: false }
           },
           yAxis: {
             type: 'value', name: '数量',
-            axisLine: { lineStyle: { color: '#dcdfe6' } },
-            splitLine: { lineStyle: { color: '#ebeef5', type: 'dashed' } }
+            nameTextStyle: { color: '#909399', fontSize: 11 },
+            axisLine: { show: false },
+            splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } }
           },
           series: [{
-            type: 'bar', data: data.map(d => d.value), barWidth: '60%',
+            type: 'bar', data: data.map(d => d.value), barWidth: '55%',
             itemStyle: {
-              borderRadius: [4, 4, 0, 0],
+              borderRadius: [6, 6, 0, 0],
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#409eff' }, { offset: 1, color: '#79bbff' }
+                { offset: 0, color: '#667eea' }, { offset: 1, color: '#764ba2' }
               ])
             },
-            label: { show: true, position: 'top', color: '#606266', fontSize: fs }
+            label: { show: true, position: 'top', color: '#667eea', fontSize: fs, fontWeight: 500 }
           }]
         }
       } else {
         return {
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(26,26,46,0.9)',
+            borderColor: 'transparent',
+            textStyle: { color: '#fff' }
+          },
           grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
           xAxis: {
             type: 'value',
-            axisLine: { lineStyle: { color: '#dcdfe6' } },
-            splitLine: { lineStyle: { color: '#ebeef5', type: 'dashed' } }
+            axisLine: { show: false },
+            splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } }
           },
           yAxis: {
             type: 'category', data: data.map(d => d.name).reverse(),
             axisLabel: { color: '#606266', fontSize: fs },
-            axisLine: { lineStyle: { color: '#dcdfe6' } }
+            axisLine: { lineStyle: { color: '#e0e0e0' } },
+            axisTick: { show: false }
           },
           series: [{
-            type: 'bar', data: data.map(d => d.value).reverse(), barWidth: '60%',
+            type: 'bar', data: data.map(d => d.value).reverse(), barWidth: '55%',
             itemStyle: {
-              borderRadius: [0, 4, 4, 0],
+              borderRadius: [0, 6, 6, 0],
               color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-                { offset: 0, color: '#409eff' }, { offset: 1, color: '#79bbff' }
+                { offset: 0, color: '#667eea' }, { offset: 1, color: '#764ba2' }
               ])
             },
-            label: { show: true, position: 'right', color: '#606266', fontSize: fs }
+            label: { show: true, position: 'right', color: '#667eea', fontSize: fs, fontWeight: 500 }
           }]
         }
       }
@@ -433,50 +453,214 @@ export default {
   background: #f5f7fa;
 }
 
+.page-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 28px 5% 22px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(102,126,234,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: 10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(118,75,162,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: 2px;
+}
+
+.hero-desc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+}
+
+.page-body {
+  padding: 30px 5% 40px;
+  margin-top: -20px;
+  position: relative;
+  z-index: 2;
+}
+
 .stats-overview {
-  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
 .stat-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: none;
-}
-
-.stat-card-blue .stat-icon-wrapper { background: linear-gradient(135deg, #409eff 0%, #337ecc 100%); }
-.stat-card-green .stat-icon-wrapper { background: linear-gradient(135deg, #67c23a 0%, #529b2e 100%); }
-.stat-card-orange .stat-icon-wrapper { background: linear-gradient(135deg, #e6a23c 0%, #b88230 100%); }
-.stat-card-purple .stat-icon-wrapper { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
-
-.stat-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  padding: 24px;
 
-  .stat-icon-wrapper {
-    width: 56px; height: 56px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    margin-right: 16px; flex-shrink: 0;
-    i { font-size: 28px; color: #fff; }
-  }
-
-  .stat-content {
-    .stat-number { font-size: 28px; font-weight: 700; color: #303133; line-height: 1.2; }
-    .stat-desc { font-size: 13px; color: #909399; margin-top: 4px; }
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   }
 }
 
-.charts-grid { padding-bottom: 40px; }
+.stat-bg-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 60px;
+  opacity: 0.06;
+}
+
+.stat-card-1 {
+  background: linear-gradient(135deg, #1e2a4a 0%, #2c3e6b 100%);
+  box-shadow: 0 4px 20px rgba(30, 42, 74, 0.3);
+
+  .stat-number, .stat-desc, .stat-bg-icon i { color: #fff; }
+  .stat-desc { opacity: 0.75; }
+  .stat-decoration { background: rgba(255,255,255,0.06); }
+}
+
+.stat-card-2 {
+  background: linear-gradient(135deg, #1a3a4a 0%, #2c5060 100%);
+  box-shadow: 0 4px 20px rgba(26, 58, 74, 0.3);
+
+  .stat-number, .stat-desc, .stat-bg-icon i { color: #fff; }
+  .stat-desc { opacity: 0.75; }
+  .stat-decoration { background: rgba(255,255,255,0.06); }
+}
+
+.stat-card-3 {
+  background: linear-gradient(135deg, #3a1a2e 0%, #5a2a42 100%);
+  box-shadow: 0 4px 20px rgba(58, 26, 46, 0.3);
+
+  .stat-number, .stat-desc, .stat-bg-icon i { color: #fff; }
+  .stat-desc { opacity: 0.75; }
+  .stat-decoration { background: rgba(255,255,255,0.06); }
+}
+
+.stat-card-4 {
+  background: linear-gradient(135deg, #2a1a4a 0%, #3e2a6a 100%);
+  box-shadow: 0 4px 20px rgba(42, 26, 74, 0.3);
+
+  .stat-number, .stat-desc, .stat-bg-icon i { color: #fff; }
+  .stat-desc { opacity: 0.75; }
+  .stat-decoration { background: rgba(255,255,255,0.06); }
+}
+
+.stat-content {
+  position: relative;
+  z-index: 1;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-desc {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.stat-decoration {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
 
 .chart-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: none;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
 
-  .card-header { display: flex; justify-content: space-between; align-items: center; }
-  .card-title { font-size: 15px; font-weight: 600; color: #303133; }
-  .chart-container { height: 340px; }
-  .chart-container-lg { height: 380px; }
-  .chart-container-wide { height: 450px; }
+  &:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
 }
+
+.chart-card-full {
+  grid-column: 1 / -1;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 0;
+}
+
+.card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-icon {
+  width: 8px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.icon-dynasty { background: linear-gradient(180deg, #667eea, #764ba2); }
+.icon-museum { background: linear-gradient(180deg, #fa709a, #fee140); }
+.icon-type { background: linear-gradient(180deg, #43e97b, #38f9d7); }
+.icon-material { background: linear-gradient(180deg, #a18cd1, #fbc2eb); }
+.icon-region { background: linear-gradient(180deg, #4facfe, #00f2fe); }
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.chart-type-select {
+  width: 110px;
+}
+
+.chart-container { height: 340px; padding: 10px; }
+.chart-container-lg { height: 380px; }
+.chart-container-wide { height: 450px; }
 </style>

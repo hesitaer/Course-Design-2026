@@ -3,7 +3,7 @@ package com.service.Impl;
 import com.entity.Cart;
 import com.entity.Product;
 import com.mapper.CartMapper;
-import com.mapper.FindImageMapper;
+
 import com.mapper.ProductMapper;
 import com.service.ICartService;
 import com.service.exception.ProductNotFoundException;
@@ -21,9 +21,6 @@ public class CartServiceImpl implements ICartService {
     private CartMapper cartMapper;
     @Autowired
     private ProductMapper productMapper;
-
-    @Autowired
-    private FindImageMapper findImageMapper  ;
 //分类查询
     @Override
     public List<Cart> SearchProductByClass(String x,String y) {//博物馆、材质、朝代、分类输入查询
@@ -40,17 +37,11 @@ public class CartServiceImpl implements ICartService {
                 p.setImg_url(address[0]);
                 result.set(i,p);
             }
-            for(int j=0;j<result.size();j++){//访问对应的图片外网
-                Cart p = result.get(j);
-                if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
-                result.set(j,p);
-            }
             return result;
         }
-        if(x.equals("mart")){
+        if(x.equals("mart") || x.equals("material")){
             result = cartMapper.findByCat1(y);
-            if(result==null){
+            if(result==null || result.isEmpty()){
                 throw new ProductNotFoundException("查询结果为空");
             }
             for (int i=0;i<result.size();i++) {//只选取第一张图片作为显示
@@ -60,17 +51,13 @@ public class CartServiceImpl implements ICartService {
                 p.setImg_url(address[0]);
                 result.set(i,p);
             }
-            for(int j=0;j<result.size();j++){//访问对应的图片外网
-                Cart p = result.get(j);
-                if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
-                result.set(j,p);
-            }
             return result;
         }
-        if(x.equals("dynasty")){
+        if(x.equals("dynasty") || x.equals("time")){
+            // 直接使用用户输入的原始值进行模糊查询
+            // 数据库中存储的格式是"Tang（唐）"，LIKE查询可以匹配中英文部分
             result = cartMapper.findByCat2(y);
-            if(result==null){
+            if(result==null || result.isEmpty()){
                 throw new ProductNotFoundException("查询结果为空");
             }
             for (int i=0;i<result.size();i++) {//只选取第一张图片作为显示
@@ -78,14 +65,7 @@ public class CartServiceImpl implements ICartService {
                 if(p.getImg_url()==null) continue;
                 String[] address = p.getImg_url().split(",");
                 p.setImg_url(address[0]);
-//                System.out.println(p.getId()+p.getImg_url());
                 result.set(i,p);
-            }
-            for(int j=0;j<result.size();j++){//访问对应的图片外网
-                Cart p = result.get(j);
-                if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
-                result.set(j,p);
             }
             return result;
         }
@@ -100,12 +80,6 @@ public class CartServiceImpl implements ICartService {
                  String[] address = p.getImg_url().split(",");
                 p.setImg_url(address[0]);
                 result.set(i,p);
-            }
-            for(int j=0;j<result.size();j++){//访问对应的图片外网
-                Cart p = result.get(j);
-                if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
-                result.set(j,p);
             }
             return result;
         }
@@ -175,12 +149,6 @@ public class CartServiceImpl implements ICartService {
                 p.setImg_url(address[0]);
                 result.set(i,p);
             }
-            for(int j=0;j<result.size();j++){//访问对应的图片外网
-                Cart p = result.get(j);
-                if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
-                result.set(j,p);
-            }
             return result;
         }
         else{
@@ -199,12 +167,6 @@ public class CartServiceImpl implements ICartService {
                  String[] address = p.getImg_url().split(",");
                 p.setImg_url(address[0]);
                 result.set(i,p);
-            }
-            for(int j=0;j<result.size();j++){//访问对应的图片外网
-                Cart p = result.get(j);
-                if(p.getImg_url()==null) continue;
-                p.setImg_url(findImageMapper.findImage(p.getImg_url()));
-                result.set(j,p);
             }
             return result;
         }
@@ -225,7 +187,7 @@ public class CartServiceImpl implements ICartService {
                 {
                     String[] address = cart.getImg_url().split(",");
                     cart.setImg_url(address[0]);
-                    cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                    
                 }
                 commentView.add(cart);
                 a1.add(cart.getId());
@@ -246,7 +208,7 @@ public class CartServiceImpl implements ICartService {
                     {
                         String[] address = cart.getImg_url().split(",");
                         cart.setImg_url(address[0]);
-                        cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                        
                     }
                     commentView.add(cart);
                     a1.add(cart.getId());
@@ -267,7 +229,7 @@ public class CartServiceImpl implements ICartService {
                     {
                         String[] address = cart.getImg_url().split(",");
                         cart.setImg_url(address[0]);
-                        cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                        
                     }
                     commentView.add(cart);
                     a1.add(cart.getId());
@@ -292,7 +254,7 @@ public class CartServiceImpl implements ICartService {
                 {
                     String[] address = cart.getImg_url().split(",");
                     cart.setImg_url(address[0]);
-                    cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                    
                 }
                 commentView.add(cart);
                 a1.add(cart.getId());
@@ -312,12 +274,107 @@ public class CartServiceImpl implements ICartService {
                 {
                     String[] address = cart.getImg_url().split(",");
                     cart.setImg_url(address[0]);
-                    cart.setImg_url(findImageMapper.findImage(cart.getImg_url()));
+                    
                 }
                 commentView.add(cart);
                 n--;
             }
             return commentView;
         }
+    
+    /**
+     * 中英文朝代名称映射转换
+     * @param dynasty 输入的朝代名称（中文或英文）
+     * @return 转换后的朝代名称
+     */
+    private String translateDynasty(String dynasty) {
+        if (dynasty == null) {
+            return null;
+        }
+        String trimmed = dynasty.trim();
+        
+        // 首先尝试移除括号及其内容，提取纯英文部分
+        String englishPart = trimmed.replaceAll("（.*?）", "").trim();
+        String chinesePart = "";
+        // 提取中文部分（括号内的内容）
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("（(.*?)）").matcher(trimmed);
+        if (matcher.find()) {
+            chinesePart = matcher.group(1);
+        }
+        
+        // 如果已经是纯中文，直接返回
+        if (isChinese(trimmed)) {
+            return trimmed;
+        }
+        
+        // 英文转中文映射（支持纯英文和带括号格式）
+        if ("Tang".equals(englishPart) || "Tang Dynasty".equals(trimmed)) {
+            return "唐";
+        } else if ("Song".equals(englishPart) || "Song Dynasty".equals(trimmed)) {
+            return "宋";
+        } else if ("Yuan".equals(englishPart) || "Yuan Dynasty".equals(trimmed)) {
+            return "元";
+        } else if ("Ming".equals(englishPart) || "Ming Dynasty".equals(trimmed)) {
+            return "明";
+        } else if ("Qing".equals(englishPart) || "Qing Dynasty".equals(trimmed)) {
+            return "清";
+        } else if ("Northern Wei".equals(englishPart) || "Northern Wei Dynasty".equals(trimmed)) {
+            return "北魏";
+        } else if ("Zhou".equals(englishPart) || "Zhou Dynasty".equals(trimmed)) {
+            return "周";
+        } else if ("Eastern Zhou".equals(englishPart) || "Eastern Zhou Dynasty".equals(trimmed)) {
+            return "东周";
+        } else if ("Northern Song".equals(englishPart)) {
+            return "北宋";
+        } else if ("Southern Song".equals(englishPart)) {
+            return "南宋";
+        } else if ("Eastern Han".equals(englishPart) || "Eastern Han Dynasty".equals(trimmed)) {
+            return "东汉";
+        } else if ("Western Han".equals(englishPart) || "Western Han Dynasty".equals(trimmed)) {
+            return "西汉";
+        } else if ("Shang".equals(englishPart) || "Shang Dynasty".equals(trimmed)) {
+            return "商";
+        } else if ("Qin".equals(englishPart) || "Qin Dynasty".equals(trimmed)) {
+            return "秦";
+        } else if ("Han".equals(englishPart) || "Han Dynasty".equals(trimmed)) {
+            return "汉";
+        } else if ("Jin".equals(englishPart) || "Jin Dynasty".equals(trimmed)) {
+            return "晋";
+        } else if ("Sui".equals(englishPart) || "Sui Dynasty".equals(trimmed)) {
+            return "隋";
+        } else if ("Three Kingdoms".equals(englishPart)) {
+            return "三国";
+        } else if ("Western Jin".equals(englishPart)) {
+            return "西晋";
+        } else if ("Eastern Jin".equals(englishPart)) {
+            return "东晋";
+        } else if ("Northern and Southern".equals(englishPart)) {
+            return "南北朝";
+        } else if ("Five Dynasties".equals(englishPart)) {
+            return "五代";
+        } else if ("Republic".equals(englishPart)) {
+            return "民国";
+        } else if ("Neolithic".equals(englishPart)) {
+            return "新石器时代";
+        } else {
+            // 如果有中文部分，返回中文部分；否则返回原始值
+            if (!chinesePart.isEmpty()) {
+                return chinesePart;
+            }
+            return dynasty;
+        }
+    }
+    
+    /**
+     * 判断字符串是否包含中文字符
+     */
+    private boolean isChinese(String str) {
+        for (char c : str.toCharArray()) {
+            if (Character.UnicodeScript.of(c) == Character.UnicodeScript.HAN) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 

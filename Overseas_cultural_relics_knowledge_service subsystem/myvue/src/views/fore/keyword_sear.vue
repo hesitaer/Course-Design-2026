@@ -92,54 +92,11 @@ export default {
           bgUrl: 'https://tse4-mm.cn.bing.net/th/id/OIP-C.5YOZG6psKqpAA89M7o3oaAHaGY?pid=ImgDet&rs=1'
         }
       ],
-      res_form: [
-        {
-          object_name: 'f7',
-          cat2: '111',
-          img_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201410%2F10%2F20141010165320_kEUVj.thumb.700_0.jpeg&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1654431956&t=79f3266521c73d40f9da38b933cdb188',
-          id: 0
-        },
-        {
-          object_name: 'eb6',
-          cat2: '111',
-          img_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201410%2F10%2F20141010165320_kEUVj.thumb.700_0.jpeg&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1654431956&t=79f3266521c73d40f9da38b933cdb188',
-          id: 0
-        },
-        {
-          object_name: 'ea5',
-          cat2: '111',
-          img_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201410%2F10%2F20141010165320_kEUVj.thumb.700_0.jpeg&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1654431956&t=79f3266521c73d40f9da38b933cdb188',
-          id: 0
-        },
-        {
-          object_name: 'd4',
-          cat2: '111',
-          img_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201410%2F10%2F20141010165320_kEUVj.thumb.700_0.jpeg&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1654431956&t=79f3266521c73d40f9da38b933cdb188',
-          id: 0
-        },
-        {
-          object_name: 'c3',
-          cat2: '111',
-          img_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201410%2F10%2F20141010165320_kEUVj.thumb.700_0.jpeg&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1654431956&t=79f3266521c73d40f9da38b933cdb188',
-          id: 0
-        },
-        {
-          object_name: 'b2',
-          cat2: '111',
-          img_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201410%2F10%2F20141010165320_kEUVj.thumb.700_0.jpeg&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1654431956&t=79f3266521c73d40f9da38b933cdb188',
-          id: 0
-        },
-        {
-          object_name: 'a1',
-          cat2: '111',
-          img_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201410%2F10%2F20141010165320_kEUVj.thumb.700_0.jpeg&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1654431956&t=79f3266521c73d40f9da38b933cdb188',
-          id: 0
-        }
-      ],
+      res_form: [],
       in_form: {
         keyword: ''
       },
-      flag: false
+      flag: true
     }
   },
   methods: {

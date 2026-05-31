@@ -2,7 +2,10 @@
   <div class="main-header">
     <el-menu class="el-menu" mode="horizontal">
       <el-menu-item class="menu-logo-holder" index="logo">
-        <img class="menu-logo" src="@/assets/menu-logo.png">
+        <div class="logo-text">
+          <span class="logo-icon">🏛️</span>
+          <span class="logo-title">数字博物馆云平台</span>
+        </div>
       </el-menu-item>
 
       <router-link to="/index">
@@ -55,7 +58,7 @@
 
       <router-link to="/personpage" v-if="isLogin">
         <div class="float-right">
-          <el-menu-item class="disable-element-hover" index="personpage">后台管理</el-menu-item>
+          <el-menu-item class="disable-element-hover" index="personpage">个人中心</el-menu-item>
         </div>
       </router-link>
       <div v-if="isLogin">
@@ -63,41 +66,16 @@
           <el-menu-item class="disable-element-hover" index="logout" v-on:click="off_log" >登出</el-menu-item>
         </div>
       </div>
-
-<!--      <div class="float-right">-->
-<!--        <el-menu-item class="disable-element-hover">-->
-<!--          <el-input size="small" type="text" v-model="resfrom.infro" placeholder="请输入内容">-->
-<!--            <el-button slot="append" class="search-button" icon="el-icon-search" v-on:click="res_res"/>-->
-<!--          </el-input>-->
-<!--        </el-menu-item>-->
-<!--      </div>-->
     </el-menu>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-
 export default {
   data () {
     return {
-      resfrom: {
-        infro: ''
-      },
-      isLogin: false,
-      res_form: [{
-        object_name: '明egfielgsfesf',
-        cat2: '明awdadvwajdwad',
-        img_url: 'https://www.wantongdiannao.com/upload/goods/1786/17180525093_175_175.jpg',
-        // eslint-disable-next-line no-undef
-        id: '1'
-      }]
+      isLogin: false
     }
-  },
-  computed: {
-    ...mapGetters([
-      'token'
-    ])
   },
   created () {
     this.loadUser()
@@ -110,13 +88,9 @@ export default {
         this.isLogin = false
       }
     },
-    jump_to_classify () {
-      this.router.push('/classify')
-    },
     off_log () {
-      // eslint-disable-next-line no-unused-expressions,no-sequences
-      localStorage.removeItem('username'),
-      localStorage.removeItem('userpassword'),
+      localStorage.removeItem('username')
+      localStorage.removeItem('userpassword')
       localStorage.setItem('islogin', 0)
       this.$router.go(0)
     }
@@ -125,6 +99,37 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.main-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 8px 0;
+}
+
+:deep(.el-menu) {
+  background: transparent !important;
+  border: none;
+}
+
+:deep(.el-menu-item) {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 15px;
+  margin: 0 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  height: 45px;
+  line-height: 45px;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+  }
+  
+  &.is-active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+  }
+}
+
 .float-left {
   float: left;
 }
@@ -134,83 +139,33 @@ export default {
 }
 
 .disable-element-hover:hover {
-  background: white !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .disable-element-hover {
-  background: white !important;
-}
-
-.search-button {
-  width: 30px;
-  padding-right: 30px;
-  padding-left: 8px;
+  background: transparent !important;
 }
 
 .menu-logo-holder {
   width: 180px;
+  margin-right: 20px;
 }
 
-.menu-logo {
-  max-width: 100%;
-  max-height: 100%;
-}
-.main-footer {
-  position: relative;
-  bottom: 0px;
-  overflow: hidden;
-  height: 180px;
-  width: 100%;
-  background: #331414;
-  color: #ffffff;
-  text-align: center;
-  font-family: "微软雅黑";
-  line-height: 20px;
-  font-size: 14px;
-  letter-spacing: 2.25px;
-}
-.view-times {
-  justify-content: center;
-  align-items: center;
+.logo-text {
   display: flex;
-  margin-top: 15px;
-  height: 35px;
-  text-align: center;
-  line-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.num {
-  width: 20px;
-  height: 32px;
-  background-color: rgba(255,255,255,0.1);
-  z-index: 9999;
-  color: #ffffff;
-  font-size: 14px;
-  line-height: 32px;
-  margin: 0 0.2rem;
-  padding-left: 3px;
-  float: left;
+.logo-icon {
+  font-size: 24px;
 }
 
-.menu {
-  letter-spacing: 0;
-  margin-top: 1rem;
-}
-
-.menu a {
-  margin: 0 0.5rem;
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.copyright {
-  letter-spacing: 0;
-  font-family: "微软雅黑";
-}
-
-.logo {
-  margin: 20px 0;
-  /* length: 30%; */
-  width: 10%;
+.logo-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
 }
 </style>

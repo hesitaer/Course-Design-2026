@@ -37,14 +37,16 @@ public class TimelineDTO implements Serializable {
     @Data
     public static class AntiqueBrief implements Serializable {
         private String objectId;
+        private Integer museumId;
         private String title;
         private String museum;
         private String imageUrl;
 
         public AntiqueBrief() {}
 
-        public AntiqueBrief(String objectId, String title, String museum, String imageUrl) {
+        public AntiqueBrief(String objectId, Integer museumId, String title, String museum, String imageUrl) {
             this.objectId = objectId;
+            this.museumId = museumId;
             this.title = title;
             this.museum = museum;
             this.imageUrl = imageUrl;

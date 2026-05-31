@@ -12,6 +12,11 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: true,
+    proxy: {
+      '/search': { target: 'http://localhost:8085', changeOrigin: true },
+      '/user': { target: 'http://localhost:8085', changeOrigin: true },
+      '/users': { target: 'http://localhost:8085', changeOrigin: true }
+    }
   }
 })

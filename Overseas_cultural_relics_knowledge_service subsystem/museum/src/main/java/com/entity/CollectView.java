@@ -1,36 +1,57 @@
 package com.entity;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 public class CollectView implements Serializable {
-    Integer id;//收藏id
-    Integer uid;//用户id
-    Integer rid;//文物id
-    String username;//用户名
-    String relicname;//文物id
+    private Long favoriteId;
+    private Long userId;
+    private Integer museumId;
+    private String objectId;
+    private LocalDateTime createdAt;
+    private String username;
+    private String objectName;
+    private String timePeriod;
+    private String imgUrl;
 
-    public Integer getId() {
-        return id;
+    public Long getFavoriteId() {
+        return favoriteId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setFavoriteId(Long favoriteId) {
+        this.favoriteId = favoriteId;
     }
 
-    public Integer getUid() {
-        return uid;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUid(Integer uid) {
-        this.uid = uid;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public Integer getRid() {
-        return rid;
+    public Integer getMuseumId() {
+        return museumId;
     }
 
-    public void setRid(Integer rid) {
-        this.rid = rid;
+    public void setMuseumId(Integer museumId) {
+        this.museumId = museumId;
+    }
+
+    public String getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getUsername() {
@@ -41,22 +62,42 @@ public class CollectView implements Serializable {
         this.username = username;
     }
 
-    public String getRelicname() {
-        return relicname;
+    public String getObjectName() {
+        return objectName;
     }
 
-    public void setRelicname(String relicname) {
-        this.relicname = relicname;
+    public void setObjectName(String objectName) {
+        this.objectName = objectName;
+    }
+
+    public String getTimePeriod() {
+        return timePeriod;
+    }
+
+    public void setTimePeriod(String timePeriod) {
+        this.timePeriod = timePeriod;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 
     @Override
     public String toString() {
         return "CollectView{" +
-                "id=" + id +
-                ", uid=" + uid +
-                ", rid=" + rid +
+                "favoriteId=" + favoriteId +
+                ", userId=" + userId +
+                ", museumId=" + museumId +
+                ", objectId='" + objectId + '\'' +
+                ", createdAt=" + createdAt +
                 ", username='" + username + '\'' +
-                ", relicname='" + relicname + '\'' +
+                ", objectName='" + objectName + '\'' +
+                ", timePeriod='" + timePeriod + '\'' +
+                ", imgUrl='" + imgUrl + '\'' +
                 '}';
     }
 }
