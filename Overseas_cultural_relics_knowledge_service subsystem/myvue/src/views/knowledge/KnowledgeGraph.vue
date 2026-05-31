@@ -165,6 +165,16 @@
       <div class="tip-hint">点击查看详情</div>
     </div>
 
+    <div
+      v-if="hoverEdge"
+      class="hover-tip"
+      :style="{ left: tooltipPos.x + 'px', top: tooltipPos.y + 'px' }"
+    >
+      <div class="tip-edge-relation">{{ hoverEdge.relation }}</div>
+      <div class="tip-edge-nodes">{{ hoverEdge.sourceName }} → {{ hoverEdge.targetName }}</div>
+      <div class="tip-edge-weight" v-if="hoverEdge.weight">共现次数: {{ hoverEdge.weight }}</div>
+    </div>
+
     <MainFooter />
   </div>
 </template>
@@ -204,6 +214,7 @@ export default {
       relatedNodes: [],
       canExpand: false,
       hoverNode: null,
+      hoverEdge: null,
       tooltipPos: { x: 0, y: 0 },
       nodeCount: 0,
       edgeCount: 0,
@@ -314,13 +325,42 @@ export default {
       return labels[category] || category
     },
     getCategoryCount (key) {
-      if (this.categoryCounts && this.categoryCounts[key] !== undefined) {
-        return this.categoryCounts[key]
+      if (this.categoryCounts) {
+        if (this.searchKeyword) {
+          if (this.categoryCounts[key] !== undefined) {
+            return this.categoryCounts[key]
+          }
+          const hasTotalKey = Object.keys(this.categoryCounts).some(k => k.endsWith('Total'))
+          if (hasTotalKey) {
+            return 0
+          }
+        }
+        const totalKey = key + 'Total'
+        if (this.categoryCounts[totalKey] !== undefined) {
+          return this.categoryCounts[totalKey]
+        }
+        if (this.categoryCounts[key] !== undefined) {
+          return this.categoryCounts[key]
+        }
       }
       return this.allNodes.filter(n => n.category === key).length
     },
     updateStats () {
-      this.nodeCount = this.displayedNodes.length
+      if (this.categoryCounts) {
+        let totalNodes = 0
+        const keys = ['museum', 'dynasty', 'artist', 'material', 'type', 'location', 'culture', 'relic']
+        for (const key of keys) {
+          const totalKey = key + 'Total'
+          if (this.categoryCounts[totalKey] !== undefined) {
+            totalNodes += this.categoryCounts[totalKey]
+          } else if (this.categoryCounts[key] !== undefined) {
+            totalNodes += this.categoryCounts[key]
+          }
+        }
+        this.nodeCount = totalNodes
+      } else {
+        this.nodeCount = this.displayedNodes.length
+      }
       this.edgeCount = this.displayedEdges.length
     },
     renderGraph () {
@@ -358,7 +398,7 @@ export default {
           shadowColor: n.color + '30'
         },
         label: {
-          show: true,
+          show: false,
           fontSize: n.symbolSize > 35 ? 12 : 10,
           color: '#2c3e50',
           position: 'bottom',
@@ -375,7 +415,7 @@ export default {
           target: e.target,
           value: weight,
           label: {
-            show: weight > 30,
+            show: false,
             formatter: e.relation,
             fontSize: 9,
             color: '#7f8c8d',
@@ -450,11 +490,14 @@ export default {
       this.chartInstance.on('mouseover', (params) => {
         if (params.dataType === 'node') {
           this.onNodeHover(params)
+        } else if (params.dataType === 'edge') {
+          this.onEdgeHover(params)
         }
       })
 
       this.chartInstance.on('mouseout', () => {
         this.hoverNode = null
+        this.hoverEdge = null
       })
     },
     adjustColor (hex, amount) {
@@ -488,6 +531,25 @@ export default {
       if (!node) return
       const event = params.event.event
       this.hoverNode = node
+      this.hoverEdge = null
+      this.tooltipPos = {
+        x: event.offsetX + 15,
+        y: event.offsetY + 15
+      }
+    },
+    onEdgeHover (params) {
+      const edgeData = params.data
+      const sourceNode = this.allNodes.find(n => n.id === edgeData.source)
+      const targetNode = this.allNodes.find(n => n.id === edgeData.target)
+      if (!sourceNode || !targetNode) return
+      const event = params.event.event
+      this.hoverNode = null
+      this.hoverEdge = {
+        sourceName: sourceNode.name,
+        targetName: targetNode.name,
+        relation: edgeData.label || edgeData.relationType || '',
+        weight: edgeData.value
+      }
       this.tooltipPos = {
         x: event.offsetX + 15,
         y: event.offsetY + 15
@@ -1021,6 +1083,25 @@ export default {
   color: rgba(69,183,209,0.5);
   border-top: 1px solid rgba(69,183,209,0.1);
   padding-top: 4px;
+}
+
+.tip-edge-relation {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8f0fe;
+  margin-bottom: 4px;
+}
+
+.tip-edge-nodes {
+  font-size: 11px;
+  color: rgba(168,200,232,0.7);
+  margin-bottom: 2px;
+}
+
+.tip-edge-weight {
+  font-size: 11px;
+  color: #45B7D1;
+  font-weight: 500;
 }
 
 .panel-slide-enter-active, .panel-slide-leave-active {

@@ -70,11 +70,20 @@ public class KnowledgeGraphServiceImpl implements IKnowledgeGraphService {
         try {
             if (keyword != null && !keyword.trim().isEmpty()) {
                 buildSearchGraph(keyword.trim(), nodes, edges);
+                Map<String, Long> searchCounts = computeCategoryCountsFromNodes(nodes);
+                Map<String, Long> totalCounts = queryCategoryCounts();
+                Map<String, Long> mergedCounts = new LinkedHashMap<>();
+                for (String key : totalCounts.keySet()) {
+                    mergedCounts.put(key + "Total", totalCounts.get(key));
+                }
+                for (String key : searchCounts.keySet()) {
+                    mergedCounts.put(key, searchCounts.get(key));
+                }
+                graphDTO.setCategoryCounts(mergedCounts);
             } else {
                 buildEntityOverviewGraph(nodes, edges);
+                graphDTO.setCategoryCounts(queryCategoryCounts());
             }
-            Map<String, Long> categoryCounts = queryCategoryCounts();
-            graphDTO.setCategoryCounts(categoryCounts);
         } catch (Exception e) {
             log.error("获取知识图谱失败", e);
         }
@@ -99,9 +108,20 @@ public class KnowledgeGraphServiceImpl implements IKnowledgeGraphService {
     }
 
     private String getNodeName(Node node) {
-        if (!node.get("name").isNull()) return node.get("name").asString();
-        if (!node.get("title").isNull()) return node.get("title").asString();
-        if (!node.get("artifact_id").isNull()) return node.get("artifact_id").asString();
+        boolean isArtifact = node.hasLabel("Artifact");
+        if (isArtifact) {
+            if (!node.get("title").isNull() && !node.get("title").asString().trim().isEmpty())
+                return node.get("title").asString();
+            if (!node.get("name").isNull() && !node.get("name").asString().trim().isEmpty())
+                return node.get("name").asString();
+            if (!node.get("artifact_id").isNull() && !node.get("artifact_id").asString().trim().isEmpty())
+                return node.get("artifact_id").asString();
+        } else {
+            if (!node.get("name").isNull() && !node.get("name").asString().trim().isEmpty())
+                return node.get("name").asString();
+            if (!node.get("title").isNull() && !node.get("title").asString().trim().isEmpty())
+                return node.get("title").asString();
+        }
         return "Unknown";
     }
 
@@ -233,66 +253,181 @@ public class KnowledgeGraphServiceImpl implements IKnowledgeGraphService {
     private void buildSearchGraph(String keyword, List<KnowledgeGraphDTO.GraphNode> nodes, List<KnowledgeGraphDTO.GraphEdge> edges) {
         try (Session session = neo4jDriver.session()) {
             Set<String> addedNodeIds = new HashSet<>();
+            Map<String, String> uriToNodeId = new HashMap<>();
 
-            Result searchResult = session.run(
-                "MATCH (n) WHERE n.name CONTAINS $keyword OR n.title CONTAINS $keyword " +
-                "RETURN n, labels(n) AS nodeLabels LIMIT 50",
-                Values.parameters("keyword", keyword)
-            );
+            String[] entityLabels = {"Museum", "Dynasty", "Artist", "Material", "ArtifactType", "Location", "Culture"};
+            String[] artifactRelTypes = {"belongsToMuseum", "belongsToDynasty", "createdBy", "hasPrimaryMaterial", "hasType", "hasCulture", "locatedIn"};
 
-            List<Record> searchRecords = searchResult.list();
-            if (searchRecords.isEmpty()) {
+            for (String label : entityLabels) {
+                String category = LABEL_CATEGORY_MAP.get(label);
+                try {
+                    Result result = session.run(
+                        "MATCH (n:`" + label + "`) WHERE n.name CONTAINS $keyword " +
+                        "OPTIONAL MATCH (n)<-[r]-() " +
+                        "WITH n.name AS name, n.uri AS uri, count(r) AS relCount " +
+                        "RETURN name, uri, relCount " +
+                        "ORDER BY relCount DESC LIMIT 50",
+                        Values.parameters("keyword", keyword)
+                    );
+                    while (result.hasNext()) {
+                        Record record = result.next();
+                        String name = record.get("name").isNull() ? label : record.get("name").asString();
+                        String uri = record.get("uri").isNull() ? name : record.get("uri").asString();
+                        int relCount = record.get("relCount").isNull() ? 0 : record.get("relCount").asInt();
+
+                        String nodeId = category + "_" + uri;
+                        if (addedNodeIds.add(nodeId)) {
+                            uriToNodeId.put(uri, nodeId);
+                            nodes.add(new KnowledgeGraphDTO.GraphNode(nodeId, name, category, relCount));
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("搜索标签 {} 失败: {}", label, e.getMessage());
+                }
+            }
+
+            try {
+                Result artifactResult = session.run(
+                    "MATCH (n:Artifact) WHERE n.title CONTAINS $keyword OR n.name CONTAINS $keyword " +
+                    "OPTIONAL MATCH (n)-[r]-() " +
+                    "WITH CASE WHEN n.title IS NOT NULL THEN n.title " +
+                    "     WHEN n.name IS NOT NULL THEN n.name " +
+                    "     ELSE n.artifact_id END AS name, " +
+                    "     n.uri AS uri, count(r) AS relCount " +
+                    "RETURN name, uri, relCount " +
+                    "ORDER BY relCount DESC LIMIT 50",
+                    Values.parameters("keyword", keyword)
+                );
+                while (artifactResult.hasNext()) {
+                    Record record = artifactResult.next();
+                    String name = record.get("name").isNull() ? "Artifact" : record.get("name").asString();
+                    String uri = record.get("uri").isNull() ? name : record.get("uri").asString();
+                    int relCount = record.get("relCount").isNull() ? 0 : record.get("relCount").asInt();
+
+                    String nodeId = "relic_" + uri;
+                    if (addedNodeIds.add(nodeId)) {
+                        uriToNodeId.put(uri, nodeId);
+                        nodes.add(new KnowledgeGraphDTO.GraphNode(nodeId, name, "relic", relCount));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("搜索Artifact节点失败: {}", e.getMessage());
+            }
+
+            if (nodes.isEmpty()) {
                 buildEntityOverviewGraph(nodes, edges);
                 return;
             }
 
-            Map<String, Node> nodeMap = new LinkedHashMap<>();
-            for (Record record : searchRecords) {
-                Node node = record.get("n").asNode();
-                String category = resolveCategory(node);
-                String name = getNodeName(node);
-                String uri = node.get("uri").isNull() ? String.valueOf(node.id()) : node.get("uri").asString();
-                String nodeId = category + "_" + uri;
+            for (String relType : artifactRelTypes) {
+                try {
+                    String targetLabel = getTargetLabelForRelType(relType);
+                    if (targetLabel == null) continue;
 
-                if (addedNodeIds.add(nodeId)) {
-                    nodeMap.put(nodeId, node);
-                    int relCount = countRelationships(session, node);
-                    nodes.add(new KnowledgeGraphDTO.GraphNode(nodeId, name, category, relCount));
+                    Result artEdgeResult = session.run(
+                        "MATCH (art:Artifact)-[:`" + relType + "`]->(b:`" + targetLabel + "`) " +
+                        "WHERE art.uri IN $artUris OR b.uri IN $entityUris " +
+                        "WITH art.uri AS artUri, art.title AS artTitle, art.name AS artName, art.artifact_id AS artId, " +
+                        "     b.uri AS bUri, b.name AS bName " +
+                        "RETURN artUri, artTitle, artName, artId, bUri, bName LIMIT 300",
+                        Values.parameters(
+                            "artUris", uriToNodeId.keySet().stream().filter(u -> true).collect(java.util.stream.Collectors.toList()),
+                            "entityUris", uriToNodeId.keySet().stream().collect(java.util.stream.Collectors.toList())
+                        )
+                    );
+                    while (artEdgeResult.hasNext()) {
+                        Record record = artEdgeResult.next();
+                        String artUri = record.get("artUri").isNull() ? "" : record.get("artUri").asString();
+                        String bUri = record.get("bUri").isNull() ? "" : record.get("bUri").asString();
+
+                        if (artUri.isEmpty() || bUri.isEmpty()) continue;
+
+                        String artTitle = record.get("artTitle").isNull() ? null : record.get("artTitle").asString();
+                        String artName = record.get("artName").isNull() ? null : record.get("artName").asString();
+                        String artId = record.get("artId").isNull() ? null : record.get("artId").asString();
+                        String bName = record.get("bName").isNull() ? targetLabel : record.get("bName").asString();
+
+                        String artNodeId = "relic_" + artUri;
+                        if (addedNodeIds.add(artNodeId)) {
+                            String displayName = artTitle != null ? artTitle : (artName != null ? artName : (artId != null ? artId : "Artifact"));
+                            uriToNodeId.put(artUri, artNodeId);
+                            nodes.add(new KnowledgeGraphDTO.GraphNode(artNodeId, displayName, "relic", 0));
+                        }
+
+                        String bCategory = LABEL_CATEGORY_MAP.get(targetLabel);
+                        String bNodeId = bCategory + "_" + bUri;
+                        if (addedNodeIds.add(bNodeId)) {
+                            uriToNodeId.put(bUri, bNodeId);
+                            nodes.add(new KnowledgeGraphDTO.GraphNode(bNodeId, bName, bCategory, 0));
+                        }
+
+                        String edgeLabel = getRelationLabel(relType);
+                        edges.add(new KnowledgeGraphDTO.GraphEdge(artNodeId, bNodeId, edgeLabel));
+                    }
+                } catch (Exception e) {
+                    log.error("搜索Artifact关系 {} 失败: {}", relType, e.getMessage());
                 }
             }
 
-            for (Map.Entry<String, Node> entry : nodeMap.entrySet()) {
-                String nodeId = entry.getKey();
-                Node node = entry.getValue();
+            for (String[] pair : COOCCURRENCE_PAIRS) {
+                String labelA = pair[0];
+                String relA = pair[1];
+                String labelB = pair[2];
+                String relB = pair[3];
+                String edgeLabel = pair[4];
 
-                Result relResult = session.run(
-                    "MATCH (m)-[r]-(other) WHERE id(m) = $nodeId " +
-                    "RETURN type(r) AS relType, labels(other) AS otherLabels, other " +
-                    "LIMIT 30",
-                    Values.parameters("nodeId", node.id())
-                );
+                try {
+                    Result cooccResult = session.run(
+                        "MATCH (a:`" + labelA + "`)<-[:`" + relA + "`]-(art:Artifact)-[:`" + relB + "`]->(b:`" + labelB + "`) " +
+                        "WHERE a.uri IN $uris OR b.uri IN $uris " +
+                        "WITH a.name AS aName, a.uri AS aUri, b.name AS bName, b.uri AS bUri, count(art) AS cnt " +
+                        "RETURN aName, aUri, bName, bUri, cnt " +
+                        "ORDER BY cnt DESC LIMIT 500",
+                        Values.parameters("uris", new ArrayList<>(uriToNodeId.keySet()))
+                    );
+                    while (cooccResult.hasNext()) {
+                        Record record = cooccResult.next();
+                        String aUri = record.get("aUri").asString();
+                        String bUri = record.get("bUri").asString();
+                        int cnt = record.get("cnt").asInt();
 
-                while (relResult.hasNext()) {
-                    Record relRecord = relResult.next();
-                    String relType = relRecord.get("relType").asString();
-                    Node otherNode = relRecord.get("other").asNode();
-                    String otherCategory = resolveCategory(otherNode);
-                    String otherName = getNodeName(otherNode);
-                    String otherUri = otherNode.get("uri").isNull() ? String.valueOf(otherNode.id()) : otherNode.get("uri").asString();
-                    String otherNodeId = otherCategory + "_" + otherUri;
+                        String sourceId = uriToNodeId.get(aUri);
+                        String targetId = uriToNodeId.get(bUri);
 
-                    if (addedNodeIds.add(otherNodeId)) {
-                        int otherRelCount = countRelationships(session, otherNode);
-                        nodes.add(new KnowledgeGraphDTO.GraphNode(otherNodeId, otherName, otherCategory, otherRelCount));
+                        if (sourceId != null && targetId != null) {
+                            edges.add(new KnowledgeGraphDTO.GraphEdge(sourceId, targetId, edgeLabel, cnt));
+                        }
                     }
-
-                    String edgeLabel = getRelationLabel(relType);
-                    edges.add(new KnowledgeGraphDTO.GraphEdge(nodeId, otherNodeId, edgeLabel));
+                } catch (Exception e) {
+                    log.error("搜索共现关系 {}-{} 失败: {}", labelA, labelB, e.getMessage());
                 }
             }
         } catch (Exception e) {
             log.error("搜索图谱失败", e);
         }
+    }
+
+    private String getTargetLabelForRelType(String relType) {
+        switch (relType) {
+            case "belongsToMuseum": return "Museum";
+            case "belongsToDynasty": return "Dynasty";
+            case "createdBy": return "Artist";
+            case "hasPrimaryMaterial": return "Material";
+            case "hasType": return "ArtifactType";
+            case "hasCulture": return "Culture";
+            case "locatedIn": return "Location";
+            default: return null;
+        }
+    }
+
+    private String resolveCategoryFromLabels(List<String> labels) {
+        String[] priority = {"Museum", "Dynasty", "Artist", "Material", "ArtifactType", "Location", "Culture", "Artifact"};
+        for (String label : priority) {
+            if (labels.contains(label)) {
+                return LABEL_CATEGORY_MAP.get(label);
+            }
+        }
+        return "entity";
     }
 
     private int countRelationships(Session session, Node node) {
@@ -331,6 +466,15 @@ public class KnowledgeGraphServiceImpl implements IKnowledgeGraphService {
             }
         } catch (Exception e) {
             log.error("查询类别总数失败", e);
+        }
+        return counts;
+    }
+
+    private Map<String, Long> computeCategoryCountsFromNodes(List<KnowledgeGraphDTO.GraphNode> nodes) {
+        Map<String, Long> counts = new LinkedHashMap<>();
+        for (KnowledgeGraphDTO.GraphNode node : nodes) {
+            String cat = node.getCategory();
+            counts.put(cat, counts.getOrDefault(cat, 0L) + 1);
         }
         return counts;
     }
