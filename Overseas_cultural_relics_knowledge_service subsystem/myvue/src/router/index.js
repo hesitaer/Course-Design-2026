@@ -29,11 +29,7 @@ const routes = [
     name: 'classify',
     component: () => import('../views/fore/classify.vue')
   },
-  {
-    path: '/keyword',
-    name: 'keyword',
-    component: () => import('../views/fore/keyword_sear.vue')
-  },
+
   {
     path: '/result',
     name: 'result',
@@ -74,11 +70,7 @@ const routes = [
     name: 'dataQuery',
     component: () => import('../views/fore/DataQueryView.vue')
   },
-  {
-    path: '/pro_search',
-    name: 'search_det',
-    component: () => import('../views/fore/search_bar.vue')
-  },
+
   {
     path: '/register',
     name: 'register',

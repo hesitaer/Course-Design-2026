@@ -1154,7 +1154,7 @@ export default {
     // 搜索关联实体
     searchEntity (entity) {
       this.$router.push({
-        path: '/keyword',
+        path: '/dataQuery',
         query: { keyword: entity }
       })
     },
