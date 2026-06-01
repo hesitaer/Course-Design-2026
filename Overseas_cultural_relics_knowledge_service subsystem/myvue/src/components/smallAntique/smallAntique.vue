@@ -51,8 +51,25 @@ export default {
       type: Boolean
     }
   },
+  data () {
+    return {
+      serverApiBase: 'http://47.96.152.190:8000'
+    }
+  },
   methods: {
     getImageUrl (imageUrl) {
+      const museumIdNum = parseInt(this.museumId)
+      
+      // 仅博物馆2、3调用服务器API
+      if (museumIdNum === 2 || museumIdNum === 3) {
+        const objId = this.objectId
+        if (objId && objId !== 'null' && objId !== 'undefined') {
+          return `${this.serverApiBase}/api/img/${museumIdNum}/${objId}`
+        }
+        return '/src/assets/timg.jpeg'
+      }
+      
+      // 其他博物馆（如博物馆1）使用原有逻辑
       if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') {
         return '/src/assets/timg.jpeg'
       }

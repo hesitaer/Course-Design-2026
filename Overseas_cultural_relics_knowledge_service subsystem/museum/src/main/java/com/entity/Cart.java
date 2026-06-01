@@ -109,6 +109,38 @@ public class Cart {
         this.img_url = img_url;
     }
     
+    public String getImage_url() {
+        return this.image_url;
+    }
+    
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
+    }
+    
+    public String getIiif_manifest_url() {
+        return this.iiif_manifest_url;
+    }
+    
+    public void setIiif_manifest_url(String iiif_manifest_url) {
+        this.iiif_manifest_url = iiif_manifest_url;
+    }
+    
+    public String getImage_path() {
+        return this.image_path;
+    }
+    
+    public void setImage_path(String image_path) {
+        this.image_path = image_path;
+    }
+    
+    public String getDetail_url() {
+        return this.detail_url;
+    }
+    
+    public void setDetail_url(String detail_url) {
+        this.detail_url = detail_url;
+    }
+    
     public String getMakers_name() {
         return this.makers_name;
     }

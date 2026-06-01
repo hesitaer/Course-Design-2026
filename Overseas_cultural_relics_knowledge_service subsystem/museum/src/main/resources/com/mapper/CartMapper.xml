@@ -104,7 +104,7 @@
 
     <select id="findByCat2" resultMap="CartResultMap">
         <include refid="selectAllColumns"/>
-        WHERE dynasty LIKE CONCAT('%', #{cat2}, '%') OR period LIKE CONCAT('%', #{cat2}, '%')
+        WHERE dynasty = #{cat2}
         LIMIT 100
     </select>
 
@@ -136,9 +136,9 @@
 
     <select id="findByMulti" resultMap="CartResultMap">
         <include refid="selectAllColumns"/>
-        WHERE museum = #{museum} 
+        WHERE museum LIKE CONCAT('%', #{museum}, '%') 
           AND material LIKE CONCAT('%', #{cat1}, '%') 
-          AND dynasty LIKE CONCAT('%', #{cat2}, '%') 
+          AND dynasty = #{cat2} 
           AND type LIKE CONCAT('%', #{cat3}, '%')
     </select>
 

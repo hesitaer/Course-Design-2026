@@ -8,7 +8,7 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/,file:uploads/
-#neo4j数据库： 
+#neo4j数据库配置
   neo4j:
     uri: bolt://47.96.152.190:7687
     authentication:
