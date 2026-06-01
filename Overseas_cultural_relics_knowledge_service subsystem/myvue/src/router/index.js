@@ -85,6 +85,30 @@ const routes = [
     component: () => import('../views/login/register.vue')
   },
   {
+    path: '/knowledge-graph',
+    name: 'KnowledgeGraph',
+    component: () => import('../views/knowledge/KnowledgeGraph.vue'),
+    meta: {
+      title: '知识图谱'
+    }
+  },
+  {
+    path: '/timeline',
+    name: 'TimelineView',
+    component: () => import('../views/timeline/TimelineView.vue'),
+    meta: {
+      title: '文物时间轴'
+    }
+  },
+  {
+    path: '/statistics',
+    name: 'StatisticsView',
+    component: () => import('../views/statistics/StatisticsView.vue'),
+    meta: {
+      title: '统计分析看板'
+    }
+  },
+  {
     path: '/personpage',
     name: 'personpage',
     component: () => import('../views/personpage/personpage.vue'),
