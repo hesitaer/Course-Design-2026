@@ -533,7 +533,7 @@ public class ProductController extends BaseController {
             result.setMessage("评论成功，等待审核");
         } catch (InsertException e) {
             result.setState(5000);
-            result.setMessage("评论失败");
+            result.setMessage(e.getMessage());
         } catch (Exception e) {
             result.setMessage("评论失败：" + e.getMessage());
             result.setState(6000);
