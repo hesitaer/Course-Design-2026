@@ -196,7 +196,7 @@
           >
             <el-card class="antique-card" :body-style="{ padding: '0' }" @click="goToDetail(antique)">
               <div class="antique-img-wrapper">
-                <img :src="getValidImageUrl(antique.imageUrl)" :alt="antique.title" class="antique-img" v-if="getValidImageUrl(antique.imageUrl)">
+                <img :src="getValidImageUrl(antique)" :alt="antique.title" class="antique-img" v-if="getValidImageUrl(antique)">
                 <div class="antique-img-placeholder" v-else>
                   <i class="el-icon-picture-outline"></i>
                 </div>
@@ -228,6 +228,7 @@ export default {
   },
   data () {
     return {
+      serverApiBase: 'http://47.96.152.190:8000',
       dynasties: [],
       selectedDynasty: 'all',
       startYear: null,
@@ -376,11 +377,24 @@ export default {
       })
     },
 
-    getValidImageUrl (imageUrl) {
-      if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') {
+    getValidImageUrl (item) {
+      const { imageUrl, museumId, objectId } = item
+      const museumIdNum = parseInt(museumId)
+
+      if (museumIdNum === 2 || museumIdNum === 3) {
+        if (objectId && objectId !== 'null' && objectId !== 'undefined') {
+          return `${this.serverApiBase}/api/img/${museumIdNum}/${objectId}`
+        }
+        return ''
+      }
+
+      if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined' || imageUrl === '') {
         return ''
       }
       if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+        if (imageUrl.startsWith('//')) {
+          return 'https:' + imageUrl
+        }
         return ''
       }
       if (imageUrl.includes(',')) {

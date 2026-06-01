@@ -195,12 +195,12 @@ public class ProductServiceImpl implements IProductService {
             List<Product> noDynastyProducts = productMapper.findNoDynasty();
             List<TimelineDTO.AntiqueBrief> noDynastyAntiques = new ArrayList<>();
             for (Product p : noDynastyProducts) {
-                String img = p.getImagePath();
+                String img = p.getImageUrl();
+                if (img != null && img.contains(",")) {
+                    img = img.split(",")[0];
+                }
                 if (img == null || img.isEmpty()) {
-                    img = p.getImageUrl();
-                    if (img != null && img.contains(",")) {
-                        img = img.split(",")[0];
-                    }
+                    img = p.getImagePath();
                 }
                 noDynastyAntiques.add(new TimelineDTO.AntiqueBrief(
                     p.getObjectId(), p.getMuseumId(), p.getTitle(), p.getMuseum(), img
