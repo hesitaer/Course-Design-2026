@@ -32,7 +32,6 @@ public class ProductServiceImpl implements IProductService {
             String[] address = product.getImageUrl().split(",");
             product.setImageUrl(address[0]);
         }
-        stripHtml(product);
         return product;
     }
 
@@ -40,7 +39,12 @@ public class ProductServiceImpl implements IProductService {
     public List<Product> findByPage(Map<String, Object> params, Integer pageNum, Integer pageSize) {
         Integer offset = (pageNum - 1) * pageSize;
         List<Product> products = productMapper.findByPage(params, offset, pageSize);
-        processImageUrls(products);
+        for (Product product : products) {
+            if (product.getImageUrl() != null) {
+                String[] address = product.getImageUrl().split(",");
+                product.setImageUrl(address[0]);
+            }
+        }
         return products;
     }
 
@@ -52,7 +56,12 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<Product> findByIds(List<String> ids) {
         List<Product> products = productMapper.findByIds(ids);
-        processImageUrls(products);
+        for (Product product : products) {
+            if (product.getImageUrl() != null) {
+                String[] address = product.getImageUrl().split(",");
+                product.setImageUrl(address[0]);
+            }
+        }
         return products;
     }
 
@@ -115,7 +124,6 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public String exportToCSV(ProductQueryDTO queryDTO) {
         List<Product> products = productMapper.findByConditions(queryDTO);
-        processImageUrls(products);
 
         StringBuilder csv = new StringBuilder();
         csv.append("museumId,objectId,title,artist,dynasty,period,type,material,culture,museum,location,imageUrl\n");
@@ -141,7 +149,6 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public String exportToJSON(ProductQueryDTO queryDTO) {
         List<Product> products = productMapper.findByConditions(queryDTO);
-        processImageUrls(products);
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -158,16 +165,6 @@ public class ProductServiceImpl implements IProductService {
                 String[] address = product.getImageUrl().split(",");
                 product.setImageUrl(address[0]);
             }
-            stripHtml(product);
-        }
-    }
-
-    private void stripHtml(Product product) {
-        if(product.getTitle() != null) {
-            product.setTitle(product.getTitle().replaceAll("<[^>]+>", ""));
-        }
-        if(product.getDescription() != null) {
-            product.setDescription(product.getDescription().replaceAll("<[^>]+>", ""));
         }
     }
 

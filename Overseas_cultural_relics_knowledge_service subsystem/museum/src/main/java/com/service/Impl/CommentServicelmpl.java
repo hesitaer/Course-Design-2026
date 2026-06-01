@@ -17,6 +17,11 @@ public class CommentServicelmpl implements ICommentService {
     @Autowired
     CommentMapper commentMapper;
 
+    private String stripHtml(String s) {
+        if (s == null) return null;
+        return s.replaceAll("<[^>]+>", "");
+    }
+
     @Override
     public Long addComment(Long userId, Integer museumId, String objectId, String content) {
         Comment comment = new Comment();
@@ -58,16 +63,28 @@ public class CommentServicelmpl implements ICommentService {
 
     @Override
     public List<CommentView> getCommentsByArtifact(Integer museumId, String objectId) {
-        return commentMapper.findByArtifact(museumId, objectId);
+        List<CommentView> list = commentMapper.findByArtifact(museumId, objectId);
+        for (CommentView cv : list) {
+            cv.setObjectName(stripHtml(cv.getObjectName()));
+        }
+        return list;
     }
 
     @Override
     public List<CommentView> getCommentsByUser(Long userId) {
-        return commentMapper.findByUserId(userId);
+        List<CommentView> list = commentMapper.findByUserId(userId);
+        for (CommentView cv : list) {
+            cv.setObjectName(stripHtml(cv.getObjectName()));
+        }
+        return list;
     }
 
     @Override
     public List<CommentView> getCommentsByUserAndArtifact(Long userId, Integer museumId, String objectId) {
-        return commentMapper.findByUserIdAndArtifact(userId, museumId, objectId);
+        List<CommentView> list = commentMapper.findByUserIdAndArtifact(userId, museumId, objectId);
+        for (CommentView cv : list) {
+            cv.setObjectName(stripHtml(cv.getObjectName()));
+        }
+        return list;
     }
 }
