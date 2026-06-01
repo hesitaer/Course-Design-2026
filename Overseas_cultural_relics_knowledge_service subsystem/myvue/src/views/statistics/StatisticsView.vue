@@ -192,7 +192,7 @@ export default {
   methods: {
     async loadStatistics () {
       try {
-        const response = await axios.get('http://localhost:8085/dataviz/statistics')
+        const response = await axios.get('/dataviz/statistics')
         if (response.data.state === 200) {
           this.statData = response.data.data
           this.totalAntiques = this.statData.totalAntiques || 0

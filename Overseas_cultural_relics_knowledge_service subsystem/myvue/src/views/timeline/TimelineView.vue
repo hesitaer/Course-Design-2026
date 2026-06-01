@@ -325,7 +325,7 @@ export default {
   methods: {
     async loadTimelineData () {
       try {
-        const response = await axios.get('http://localhost:8085/dataviz/timeline')
+        const response = await axios.get('/dataviz/timeline')
         if (response.data.state === 200) {
           const data = response.data.data
           this.timelineData = this.convertToTimelineFormat(data)

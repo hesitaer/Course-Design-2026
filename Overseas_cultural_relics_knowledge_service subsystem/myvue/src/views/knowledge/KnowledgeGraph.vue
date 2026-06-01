@@ -239,7 +239,7 @@ export default {
     async loadGraphData () {
       this.loading = true
       try {
-        const response = await axios.post('http://localhost:8085/knowledge/graph', {
+        const response = await axios.post('/knowledge/graph', {
           keyword: this.searchKeyword
         })
         if (response.data.state === 200) {
