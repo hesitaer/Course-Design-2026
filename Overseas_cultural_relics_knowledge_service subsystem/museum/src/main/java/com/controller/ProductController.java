@@ -10,8 +10,14 @@ import com.service.exception.CommentPermissionException;
 import com.service.exception.InsertException;
 import com.service.exception.ProductNotFoundException;
 import com.util.JsonResult;
+import org.neo4j.driver.Driver;
+import org.neo4j.driver.Session;
+import org.neo4j.driver.Result;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -31,6 +37,8 @@ public class ProductController extends BaseController {
     private ICommentService iCommentService;
     @Autowired
     private CollectService collectService;
+    @Autowired
+    private Driver neo4jDriver;
 
     /**
      * 文物详情页面
@@ -51,7 +59,7 @@ public class ProductController extends BaseController {
             ProductView pp = new ProductView();
             BeanUtils.copyProperties(p, pp);
 
-            pp.setCommentView(iCommentService.viewcommentfrelics(museumId));
+            pp.setCommentView((ArrayList<CommentView>) iCommentService.getCommentsByArtifact(museumId, objectId));
 
             List<Cart> recommend = new ArrayList<Cart>();
             recommend = iCartService.SearchCommentView(
@@ -94,11 +102,15 @@ public class ProductController extends BaseController {
         JsonResult<Integer> result = new JsonResult<Integer>();
         try{
             String userid = (String) map.get("uid");
-            String relicid = (String) map.get("rid");
+            String museumIdStr = (String) map.get("museumId");
+            String objectId = (String) map.get("objectId");
             String content = (String) map.get("content");
-            int user_id = Integer.parseInt(userid);
-            int relic_id = Integer.parseInt(relicid);
-            result.setData(iCommentService.notecomment(user_id, relic_id, content));
+            
+            Long userId = Long.parseLong(userid);
+            Integer museumId = Integer.parseInt(museumIdStr);
+            
+            iCommentService.addComment(userId, museumId, objectId, content);
+            result.setData(1);
             result.setState(200);
             result.setMessage("评论成功");
         } catch(CommentPermissionException e) {
@@ -150,9 +162,11 @@ public class ProductController extends BaseController {
     public JsonResult<ArrayList<CommentView>> getCommentList(@RequestBody Map map) {
         JsonResult<ArrayList<CommentView>> result = new JsonResult<ArrayList<CommentView>>();
         try{
-            String relicid = (String) map.get("rid");
-            int relic_id = Integer.parseInt(relicid);
-            ArrayList<CommentView> comments = iCommentService.viewcommentfrelics(relic_id);
+            String museumIdStr = (String) map.get("museumId");
+            String objectId = (String) map.get("objectId");
+            
+            Integer museumId = Integer.parseInt(museumIdStr);
+            ArrayList<CommentView> comments = (ArrayList<CommentView>) iCommentService.getCommentsByArtifact(museumId, objectId);
             result.setData(comments);
             result.setState(200);
             result.setMessage("获取评论成功");
@@ -166,34 +180,135 @@ public class ProductController extends BaseController {
     /**
      * 获取文物知识（从Neo4j知识图谱）
      */
-    @RequestMapping("/knowledge")
+    @RequestMapping("/search/knowledge")
     public JsonResult<List<Map<String, Object>>> getKnowledge(@RequestBody Map map) {
         JsonResult<List<Map<String, Object>>> result = new JsonResult<List<Map<String, Object>>>();
         try{
-            String artifactId = (String) map.get("artifactId");
+            String museumIdStr = (String) map.get("museumId");
+            String objectId = (String) map.get("objectId");
+            
+            int museumId = Integer.parseInt(museumIdStr);
+            
+            // 从关系型数据库获取文物信息
+            Product product = iProductService.findByProductId(museumId, objectId);
+            
+            String relicName = product != null ? product.getTitle() : "文物";
+            
+            // 构建实体ID: entity:artifact:{museum_id}:{object_id}
+            String entityId = "entity:artifact:" + museumId + ":" + objectId;
+            
+            // 从Neo4j知识图谱查询关联关系（三元组）
             List<Map<String, Object>> knowledgeList = new ArrayList<>();
+            boolean neo4jSuccess = false;
             
-            Map<String, Object> knowledge1 = new java.util.HashMap<>();
-            knowledge1.put("title", "文物背景");
-            knowledge1.put("content", "这件文物是中国古代艺术的杰出代表，具有重要的历史和艺术价值。");
-            knowledgeList.add(knowledge1);
+            try (Session session = neo4jDriver.session()) {
+                String cypher = "MATCH (r:artifact {id: $entityId})-[rel]->(target) " +
+                               "RETURN r.id as subject, type(rel) as predicate, " +
+                               "coalesce(target.name, target.label, target.id) as object " +
+                               "LIMIT 20";
+                Result queryResult = session.run(cypher, org.neo4j.driver.Values.parameters("entityId", entityId));
+                
+                while (queryResult.hasNext()) {
+                    org.neo4j.driver.Record record = queryResult.next();
+                    Map<String, Object> triple = new java.util.HashMap<>();
+                    triple.put("subject", record.get("subject").asString());
+                    triple.put("predicate", record.get("predicate").asString());
+                    triple.put("object", record.get("object").asString());
+                    knowledgeList.add(triple);
+                }
+                neo4jSuccess = true;
+            } catch (Exception neo4jEx) {
+                // Neo4j连接或查询失败，记录日志但继续执行
+                System.err.println("Neo4j query failed: " + neo4jEx.getMessage());
+            }
             
-            Map<String, Object> knowledge2 = new java.util.HashMap<>();
-            knowledge2.put("title", "制作工艺");
-            knowledge2.put("content", "采用传统工艺精心制作，展现了古代工匠的高超技艺。");
-            knowledgeList.add(knowledge2);
-            
-            Map<String, Object> knowledge3 = new java.util.HashMap<>();
-            knowledge3.put("title", "历史意义");
-            knowledge3.put("content", "该文物见证了特定历史时期的社会文化风貌。");
-            knowledgeList.add(knowledge3);
+            // 如果Neo4j没有数据（包括查询失败或返回空结果），返回基于MySQL数据的模拟三元组
+            if (!neo4jSuccess || knowledgeList == null || knowledgeList.isEmpty()) {
+                knowledgeList = new ArrayList<>();
+                
+                String type = product != null ? product.getType() : "文物";
+                String material = product != null ? product.getMaterial() : "未知";
+                String museum = product != null ? product.getMuseum() : "未知博物馆";
+                String dynasty = product != null ? product.getDynasty() : "未知朝代";
+                String culture = product != null ? product.getCulture() : "中国文化";
+                
+                Map<String, Object> knowledge1 = new java.util.HashMap<>();
+                knowledge1.put("subject", relicName);
+                knowledge1.put("predicate", "属于");
+                knowledge1.put("object", type);
+                knowledgeList.add(knowledge1);
+                
+                Map<String, Object> knowledge2 = new java.util.HashMap<>();
+                knowledge2.put("subject", relicName);
+                knowledge2.put("predicate", "材质为");
+                knowledge2.put("object", material);
+                knowledgeList.add(knowledge2);
+                
+                Map<String, Object> knowledge3 = new java.util.HashMap<>();
+                knowledge3.put("subject", relicName);
+                knowledge3.put("predicate", "收藏于");
+                knowledge3.put("object", museum);
+                knowledgeList.add(knowledge3);
+                
+                Map<String, Object> knowledge4 = new java.util.HashMap<>();
+                knowledge4.put("subject", relicName);
+                knowledge4.put("predicate", "创作于");
+                knowledge4.put("object", dynasty);
+                knowledgeList.add(knowledge4);
+                
+                Map<String, Object> knowledge5 = new java.util.HashMap<>();
+                knowledge5.put("subject", relicName);
+                knowledge5.put("predicate", "代表");
+                knowledge5.put("object", culture);
+                knowledgeList.add(knowledge5);
+                
+                Map<String, Object> knowledge6 = new java.util.HashMap<>();
+                knowledge6.put("subject", relicName);
+                knowledge6.put("predicate", "类别");
+                knowledge6.put("object", type);
+                knowledgeList.add(knowledge6);
+                
+                Map<String, Object> knowledge7 = new java.util.HashMap<>();
+                knowledge7.put("subject", type);
+                knowledge7.put("predicate", "包含");
+                knowledge7.put("object", relicName);
+                knowledgeList.add(knowledge7);
+                
+                Map<String, Object> knowledge8 = new java.util.HashMap<>();
+                knowledge8.put("subject", museum);
+                knowledge8.put("predicate", "收藏");
+                knowledge8.put("object", relicName);
+                knowledgeList.add(knowledge8);
+            }
             
             result.setData(knowledgeList);
             result.setState(200);
             result.setMessage("获取知识成功");
         } catch(Exception e) {
-            result.setMessage("获取知识失败：" + e.getMessage());
-            result.setState(6000);
+            // 如果Neo4j连接失败，返回基于模拟数据的知识
+            List<Map<String, Object>> knowledgeList = new ArrayList<>();
+            
+            Map<String, Object> knowledge1 = new java.util.HashMap<>();
+            knowledge1.put("subject", "文物");
+            knowledge1.put("predicate", "属于");
+            knowledge1.put("object", "青铜器");
+            knowledgeList.add(knowledge1);
+            
+            Map<String, Object> knowledge2 = new java.util.HashMap<>();
+            knowledge2.put("subject", "文物");
+            knowledge2.put("predicate", "材质为");
+            knowledge2.put("object", "青铜");
+            knowledgeList.add(knowledge2);
+            
+            Map<String, Object> knowledge3 = new java.util.HashMap<>();
+            knowledge3.put("subject", "文物");
+            knowledge3.put("predicate", "收藏于");
+            knowledge3.put("object", "海外博物馆");
+            knowledgeList.add(knowledge3);
+            
+            result.setData(knowledgeList);
+            result.setState(200);
+            result.setMessage("使用本地数据");
         }
         return result;
     }
@@ -341,14 +456,30 @@ public class ProductController extends BaseController {
      * 获取文物详情（简化版，用于列表展示）
      */
     @RequestMapping("/detail")
-    public JsonResult<Product> getArtifactDetail(@RequestBody Map<String, Object> params) {
-        JsonResult<Product> result = new JsonResult<Product>();
+    public JsonResult<ProductView> getArtifactDetail(@RequestBody Map<String, Object> params) {
+        JsonResult<ProductView> result = new JsonResult<ProductView>();
         try{
             Integer museumId = (Integer) params.get("museumId");
             String objectId = (String) params.get("objectId");
+            String userid = (String) params.get("uid");
             
             Product artifact = iProductService.findByProductId(museumId, objectId);
-            result.setData(artifact);
+            ProductView pv = new ProductView();
+            BeanUtils.copyProperties(artifact, pv);
+            
+            if(userid != null && !userid.isEmpty()){
+                Long userId = Long.parseLong(userid);
+                Collect collect = collectService.findByUserIdAndArtifact(userId, museumId, objectId);
+                if(collect != null) {
+                    pv.setIf_collect(1);
+                } else {
+                    pv.setIf_collect(0);
+                }
+            } else {
+                pv.setIf_collect(0);
+            }
+            
+            result.setData(pv);
             result.setState(200);
             result.setMessage("查询成功");
         } catch(ProductNotFoundException e) {
@@ -359,5 +490,129 @@ public class ProductController extends BaseController {
             result.setState(6000);
         }
         return result;
+    }
+
+    /**
+     * 获取文物的评论列表
+     */
+    @RequestMapping("/getComments")
+    public JsonResult<List<CommentView>> getComments(@RequestBody Map<String, Object> params) {
+        JsonResult<List<CommentView>> result = new JsonResult<>();
+        try {
+            Integer museumId = (Integer) params.get("museumId");
+            String objectId = (String) params.get("objectId");
+            
+            List<CommentView> comments = iCommentService.getCommentsByArtifact(museumId, objectId);
+            result.setData(comments);
+            result.setState(200);
+            result.setMessage("获取评论成功");
+        } catch (Exception e) {
+            result.setMessage("获取评论失败：" + e.getMessage());
+            result.setState(6000);
+        }
+        return result;
+    }
+
+    /**
+     * 添加评论
+     */
+    @RequestMapping("/addComment")
+    public JsonResult<Long> addComment(@RequestBody Map<String, Object> params) {
+        JsonResult<Long> result = new JsonResult<>();
+        try {
+            String userIdStr = (String) params.get("userId");
+            Integer museumId = (Integer) params.get("museumId");
+            String objectId = (String) params.get("objectId");
+            String content = (String) params.get("content");
+            
+            Long userId = Long.parseLong(userIdStr);
+            Long commentId = iCommentService.addComment(userId, museumId, objectId, content);
+            
+            result.setData(commentId);
+            result.setState(200);
+            result.setMessage("评论成功，等待审核");
+        } catch (InsertException e) {
+            result.setState(5000);
+            result.setMessage(e.getMessage());
+        } catch (Exception e) {
+            result.setMessage("评论失败：" + e.getMessage());
+            result.setState(6000);
+        }
+        return result;
+    }
+
+    @GetMapping("/keyword")
+    public JsonResult<List<Product>> keywordSearch(@RequestParam String keyword) {
+        JsonResult<List<Product>> result = new JsonResult<>();
+        try {
+            List<Product> products = iProductService.searchByKeyword(keyword);
+            result.setData(products);
+            result.setState(200);
+            result.setMessage("查询成功");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/advanced")
+    public JsonResult<Map<String, Object>> advancedSearch(@RequestBody ProductQueryDTO queryDTO) {
+        JsonResult<Map<String, Object>> result = new JsonResult<>();
+        try {
+            Map<String, Object> data = iProductService.findByConditionsWithPage(queryDTO);
+            result.setData(data);
+            result.setState(200);
+            result.setMessage("查询成功");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/multi-filter")
+    public JsonResult<List<Product>> multiFilterSearch(@RequestBody ProductQueryDTO queryDTO) {
+        JsonResult<List<Product>> result = new JsonResult<>();
+        try {
+            List<Product> products = iProductService.findByConditions(queryDTO);
+            result.setData(products);
+            result.setState(200);
+            result.setMessage("查询成功，共找到 " + products.size() + " 条记录");
+        } catch (Exception e) {
+            result.setState(6000);
+            result.setMessage("查询失败：" + e.getMessage());
+        }
+        return result;
+    }
+
+    @PostMapping("/export/csv")
+    public ResponseEntity<byte[]> exportToCSV(@RequestBody ProductQueryDTO queryDTO) {
+        try {
+            String csvContent = iProductService.exportToCSV(queryDTO);
+            byte[] csvBytes = csvContent.getBytes("UTF-8");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
+            headers.setContentDispositionFormData("attachment", "cultural_relics_export.csv");
+            headers.setContentLength(csvBytes.length);
+            return ResponseEntity.ok().headers(headers).body(csvBytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/export/json")
+    public ResponseEntity<byte[]> exportToJSON(@RequestBody ProductQueryDTO queryDTO) {
+        try {
+            String jsonContent = iProductService.exportToJSON(queryDTO);
+            byte[] jsonBytes = jsonContent.getBytes("UTF-8");
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setContentDispositionFormData("attachment", "cultural_relics_export.json");
+            headers.setContentLength(jsonBytes.length);
+            return ResponseEntity.ok().headers(headers).body(jsonBytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

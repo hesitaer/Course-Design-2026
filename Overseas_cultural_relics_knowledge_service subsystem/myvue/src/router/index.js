@@ -33,11 +33,7 @@ const routes = [
     name: 'classify',
     component: () => import('../views/fore/classify.vue')
   },
-  {
-    path: '/keyword',
-    name: 'keyword',
-    component: () => import('../views/fore/keyword_sear.vue')
-  },
+
   {
     path: '/result',
     name: 'result',
@@ -74,14 +70,39 @@ const routes = [
     component: () => import('../views/fore/AntiqueCompare.vue')
   },
   {
-    path: '/pro_search',
-    name: 'search_det',
-    component: () => import('../views/fore/search_bar.vue')
+    path: '/dataQuery',
+    name: 'dataQuery',
+    component: () => import('../views/fore/DataQueryView.vue')
   },
+
   {
     path: '/register',
     name: 'register',
     component: () => import('../views/login/register.vue')
+  },
+  {
+    path: '/knowledge-graph',
+    name: 'KnowledgeGraph',
+    component: () => import('../views/knowledge/KnowledgeGraph.vue'),
+    meta: {
+      title: '知识图谱'
+    }
+  },
+  {
+    path: '/timeline',
+    name: 'TimelineView',
+    component: () => import('../views/timeline/TimelineView.vue'),
+    meta: {
+      title: '文物时间轴'
+    }
+  },
+  {
+    path: '/statistics',
+    name: 'StatisticsView',
+    component: () => import('../views/statistics/StatisticsView.vue'),
+    meta: {
+      title: '统计分析看板'
+    }
   },
   {
     path: '/personpage',

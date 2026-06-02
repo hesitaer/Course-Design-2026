@@ -8,47 +8,31 @@
     </div>
     <br>
     <el-empty v-if="historyList.length === 0" description="暂无浏览记录"></el-empty>
-    <el-table
-      v-else
-      :data="historyList"
-      style="width: 100%"
-      @row-click="goToDetail">
-      <el-table-column
-        label="文物图片"
-        width="100">
-        <template slot-scope="scope">
-          <img :src="scope.row.img_url || '/src/assets/timg.jpeg'" class="history-img" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="文物名称"
-        prop="object_name"
-        width="200">
-      </el-table-column>
-      <el-table-column
-        label="文物时期"
-        prop="time_period"
-        width="150">
-      </el-table-column>
-      <el-table-column
-        label="浏览时间"
-        prop="browse_time"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        label="操作">
-        <template slot-scope="scope">
-          <el-button type="text" size="small" @click.stop="removeItem(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div v-else class="card-list">
+      <smallAntique 
+        v-for="(item, index) in historyList" 
+        :key="index"
+        :title="item.object_name"
+        :pic="item.img_url"
+        :info="item.time_period"
+        :time="item.browse_time"
+        :museumId="item.museum_id"
+        :objectId="item.object_id"
+        :showRemove="true"
+        @remove="removeItem"
+      />
+    </div>
   </div>
 </template>
 
 <script>
+import smallAntique from '../../components/smallAntique/smallAntique.vue'
 var storage = window.localStorage
 export default {
   name: 'browse_history',
+  components: {
+    smallAntique
+  },
   data () {
     return {
       historyList: []
@@ -82,7 +66,7 @@ export default {
         })
       }).catch(() => {})
     },
-    removeItem (row) {
+    removeItem (data) {
       this.$confirm('确定要删除这条浏览记录吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -91,7 +75,9 @@ export default {
         const history = storage.getItem('browse_history')
         if (history) {
           let list = JSON.parse(history)
-          list = list.filter(item => item.object_id !== row.object_id || item.browse_time !== row.browse_time)
+          const museumId = data.museumId
+          const objectId = data.objectId
+          list = list.filter(h => !(String(h.museum_id) === String(museumId) && String(h.object_id) === String(objectId)))
           storage.setItem('browse_history', JSON.stringify(list))
           this.historyList = list
           this.$message({
@@ -100,12 +86,6 @@ export default {
           })
         }
       }).catch(() => {})
-    },
-    goToDetail (row) {
-      this.$router.push({
-        path: '/antiqueDetail',
-        query: { id: row.object_id, museum_id: row.museum_id }
-      })
     }
   }
 }
@@ -118,10 +98,9 @@ export default {
   align-items: center;
 }
 
-.history-img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 4px;
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 </style>

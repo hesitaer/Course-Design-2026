@@ -14,7 +14,7 @@
               @click="openFullscreen"
             >
               <img 
-                :src="getValidImageUrl(artifact.imageUrl || artifact.image_url || artifact.img_url)" 
+                :src="getValidImageUrl(artifact)" 
                 class="main-image"
                 :style="{ transform: `scale(${scale})` }"
                 alt="文物图片"
@@ -24,6 +24,14 @@
             <!-- 图片操作工具栏 -->
             <div class="image-toolbar">
               <div class="zoom-controls">
+                <el-button 
+                  type="default" 
+                  size="small" 
+                  @click="goBack"
+                  icon="el-icon-arrow-left"
+                >
+                  返回
+                </el-button>
                 <el-button 
                   type="default" 
                   size="small" 
@@ -161,8 +169,9 @@
                 :key="index"
                 class="triple-item"
               >
-                <div class="knowledge-title">{{ item.title }}</div>
-                <div class="knowledge-content">{{ item.content }}</div>
+                <span class="triple-subject">{{ item.subject }}</span>
+                <span class="triple-predicate">{{ item.predicate }}</span>
+                <span class="triple-object">{{ item.object }}</span>
               </div>
               <div v-if="knowledgeTriples.length === 0" class="empty-state">
                 <el-empty description="暂无知识图谱关联数据"></el-empty>
@@ -178,7 +187,7 @@
                   :key="index"
                   type="info"
                   closable
-                  @click="searchEntity(entity)"
+
                 >
                   {{ entity }}
                 </el-tag>
@@ -220,7 +229,7 @@
                     <router-link 
                       :to="{path: '/antiqueDetail', query: {id: item.id, museum_id: item.museum_id, object_id: item.object_id}}"
                     >
-                      <img :src="getValidImageUrl(item.image_url || item.ImageUrl || item.img_url)" class="recommend-image" alt="">
+                      <img :src="getValidImageUrl(item)" class="recommend-image" alt="">
                       <div class="recommend-info">
                         <span class="recommend-title">{{ item.title }}</span>
                         <span class="recommend-dynasty">{{ item.dynasty }}</span>
@@ -239,21 +248,26 @@
         <!-- 评论区域 -->
         <div class="comment-section">
           <el-card class="comment-card">
-            <h3 class="section-title">评论</h3>
+            <h3 class="section-title">
+              <i class="el-icon-chat-dot-round"></i>
+              评论 ({{ comments.length }})
+            </h3>
             <div class="comment-list">
               <div 
-                v-for="(comment, index) in comments" 
-                :key="index"
+                v-for="comment in comments" 
+                :key="comment.commentId"
                 class="comment-item"
               >
                 <div class="comment-header">
-                  <span class="comment-author">{{ comment.username || '匿名用户' }}</span>
-                  <span class="comment-time">{{ comment.created_time }}</span>
+                  <div class="comment-user-info">
+                    <span class="comment-author">{{ comment.username || '匿名用户' }}</span>
+                  </div>
+                  <span class="comment-time">{{ formatCommentTime(comment.createdAt) }}</span>
                 </div>
                 <p class="comment-content">{{ comment.content }}</p>
               </div>
               <div v-if="comments.length === 0" class="empty-state">
-                <el-empty description="暂无评论"></el-empty>
+                <el-empty description="暂无评论，快来发表第一条评论吧~"></el-empty>
               </div>
             </div>
             
@@ -262,16 +276,21 @@
               <textarea 
                 v-model="newComment"
                 class="comment-textarea"
-                placeholder="发表评论..."
+                placeholder="发表您的看法..."
                 rows="3"
+                maxlength="500"
               ></textarea>
-              <el-button 
-                type="primary" 
-                @click="submitComment"
-                :disabled="!newComment.trim()"
-              >
-                发表评论
-              </el-button>
+              <div class="comment-input-footer">
+                <span class="char-count">{{ newComment.length }}/500</span>
+                <el-button 
+                  type="primary" 
+                  @click="submitComment"
+                  :disabled="!newComment.trim()"
+                  size="small"
+                >
+                  发表评论
+                </el-button>
+              </div>
             </div>
           </el-card>
         </div>
@@ -285,7 +304,7 @@
           <i class="el-icon-close"></i>
         </button>
         <img 
-          :src="getValidImageUrl(artifact.imageUrl || artifact.image_url || artifact.img_url)" 
+          :src="getValidImageUrl(artifact)" 
           class="fullscreen-image"
           :style="{ transform: `scale(${fullscreenScale})` }"
           @wheel="handleFullscreenZoom"
@@ -355,6 +374,8 @@ export default {
       newComment: '',
       // 默认图片（使用base64 SVG，避免外部依赖）
       defaultImage: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f5f5f5" width="400" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="16" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E暂无图片%3C/text%3E%3C/svg%3E',
+      // 服务器图片API地址（仅用于博物馆2、3）
+      serverApiBase: 'http://47.96.152.190:8000',
       // 表单数据
       form: {
         rid: '',
@@ -385,9 +406,19 @@ export default {
     }
   },
   methods: {
+    // 返回上一页
+    goBack () {
+      // 尝试使用浏览器历史返回
+      if (window.history.length > 1) {
+        window.history.back()
+      } else {
+        // 如果没有历史记录，跳转到浏览页面
+        this.$router.push('/fore')
+      }
+    },
     // 页面初始化
     pageInit () {
-      this.form.uid = window.localStorage.getItem('username')
+      this.form.uid = window.localStorage.getItem('user_id') || window.localStorage.getItem('username')
       
       // 获取URL参数
       this.museum_id = this.$route.query.museum_id
@@ -400,6 +431,8 @@ export default {
         this.loadComments()
         this.loadKnowledgeGraph()
         this.loadRelatedArtifacts()
+        // 添加浏览记录
+        this.addBrowseHistory()
       })
     },
     
@@ -410,7 +443,8 @@ export default {
         if (this.museum_id && this.object_id) {
           axios.post('http://localhost:8085/search/detail', { 
             museumId: parseInt(this.museum_id), 
-            objectId: String(this.object_id) 
+            objectId: String(this.object_id),
+            uid: this.form.uid
           })
             .then((response) => {
               if (response.data.state === 200) {
@@ -444,33 +478,42 @@ export default {
       })
     },
     
-    // 加载评论
+    /**
+     * 加载评论
+     */
     loadComments () {
-      axios.post('http://localhost:8085/search/searchById/comment/list', { rid: this.form.rid })
+      if (!this.museum_id || !this.object_id) {
+        return
+      }
+      
+      axios.post('http://localhost:8085/search/getComments', {
+        museumId: parseInt(this.museum_id),
+        objectId: String(this.object_id)
+      })
         .then((response) => {
           if (response.data.state === 200) {
-            this.comments = response.data.data
+            this.comments = response.data.data || []
           }
         })
         .catch((error) => {
-          console.log(error)
+          console.log('加载评论失败:', error)
         })
     },
     
     // 加载知识图谱数据
     loadKnowledgeGraph () {
-      axios.post('http://localhost:8085/search/knowledge', { artifactId: this.form.rid })
+      axios.post('http://localhost:8085/search/knowledge', { 
+        museumId: parseInt(this.museum_id), 
+        objectId: String(this.object_id)
+      })
         .then((response) => {
           if (response.data.state === 200) {
-            // 后端返回的是 [{title, content}, ...] 格式
             this.knowledgeTriples = response.data.data || []
-            // 从知识数据中提取关联实体
-            this.relatedEntities = this.knowledgeTriples.map(item => item.title) || []
+            this.relatedEntities = [...new Set(this.knowledgeTriples.map(item => item.object).filter(Boolean))]
           }
         })
         .catch((error) => {
           console.log(error)
-          // 使用模拟数据
           this.loadMockKnowledgeData()
         })
     },
@@ -507,12 +550,10 @@ export default {
     loadRelatedByOtherConditions () {
       // 如果朝代不为空且不是"未知"，尝试按朝代查询
       if (this.artifact.dynasty && this.artifact.dynasty !== '未知') {
-        const dynastyKey = this.artifact.dynasty.match(/^([A-Za-z][A-Za-z\s]*)/)
-        const dynastyEn = dynastyKey ? dynastyKey[1].trim() : this.artifact.dynasty
-        
+        // 使用完整的朝代值进行精确匹配（如 "Tang（唐）"）
         axios.post('http://localhost:8085/search/classification', { 
           c: 'dynasty',
-          v_1: dynastyEn
+          v_1: this.artifact.dynasty
         })
           .then((response) => {
             if (response.data.state === 200 && response.data.data.length > 0) {
@@ -538,7 +579,7 @@ export default {
     loadRandomArtifacts () {
       axios.post('http://localhost:8085/search/classification', { 
         c: 'dynasty',
-        v_1: 'Shang' // 使用已知的朝代来获取数据
+        v_1: 'Shang（商）' // 使用完整格式进行精确匹配
       })
         .then((response) => {
             if (response.data.state === 200 && response.data.data.length > 0) {
@@ -563,28 +604,37 @@ export default {
     },
     
     // 校验图片URL是否有效
-    getValidImageUrl (imageUrl) {
-      // 检查多种空值情况
-      if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined' || imageUrl === '' || imageUrl === 'NULL') {
-        return this.defaultImage
-      }
+    getValidImageUrl (item) {
+      const { imageUrl, image_url, img_url, museum_id, object_id } = item
+      const url = imageUrl || image_url || img_url
+      const museumIdNum = parseInt(museum_id) || parseInt(this.museum_id)
+      const objId = object_id || this.object_id
       
-      // 检查URL是否完整（包含http://或https://）
-      if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-        // 尝试添加协议
-        if (imageUrl.startsWith('//')) {
-          return 'https:' + imageUrl
+      // 仅博物馆2、3调用服务器API
+      if (museumIdNum === 2 || museumIdNum === 3) {
+        if (objId && objId !== 'null' && objId !== 'undefined') {
+          return `${this.serverApiBase}/api/img/${museumIdNum}/${objId}`
         }
-        // 不完整的URL，使用默认图片
         return this.defaultImage
       }
       
-      // 检查URL是否有效（简单检查）
+      // 其他博物馆（如博物馆1）使用原有逻辑
+      if (!url || url === 'null' || url === 'undefined' || url === '' || url === 'NULL') {
+        return this.defaultImage
+      }
+      
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        if (url.startsWith('//')) {
+          return 'https:' + url
+        }
+        return this.defaultImage
+      }
+      
       try {
-        new URL(imageUrl)
-        return imageUrl
+        new URL(url)
+        return url
       } catch (e) {
-        console.log('Invalid image URL:', imageUrl)
+        console.log('Invalid image URL:', url)
         return this.defaultImage
       }
     },
@@ -815,16 +865,25 @@ export default {
       }
     },
     
-    // 加载模拟知识图谱数据
+    // 加载模拟知识图谱数据（使用当前文物的真实数据）
     loadMockKnowledgeData () {
+      const relicName = this.artifact.title || this.artifact.object_name || '文物'
+      const dynasty = this.artifact.dynasty || '未知朝代'
+      const type = this.artifact.type || '文物'
+      const material = this.getMaterial(this.artifact.material) || '未知材质'
+      const museum = this.artifact.museum || '未知博物馆'
+      const culture = this.artifact.culture || '中国文化'
+      const artist = this.artifact.artist || '未知作者'
+      
       this.knowledgeTriples = [
-        { subject: '青铜方鼎', predicate: '创作于', object: '商朝' },
-        { subject: '青铜方鼎', predicate: '材质为', object: '青铜' },
-        { subject: '青铜方鼎', predicate: '收藏于', object: '史密森尼博物馆' },
-        { subject: '青铜方鼎', predicate: '属于', object: '青铜器' },
-        { subject: '青铜方鼎', predicate: '出土于', object: '河南安阳' }
+        { subject: relicName, predicate: '创作于', object: dynasty },
+        { subject: relicName, predicate: '材质为', object: material },
+        { subject: relicName, predicate: '收藏于', object: museum },
+        { subject: relicName, predicate: '属于', object: type },
+        { subject: relicName, predicate: '代表', object: culture },
+        { subject: relicName, predicate: '作者', object: artist }
       ]
-      this.relatedEntities = ['商朝', '青铜器', '史密森尼博物馆', '河南安阳', '青铜']
+      this.relatedEntities = [dynasty, material, museum, type, culture, artist]
     },
     
     // 加载模拟相关文物数据
@@ -947,16 +1006,17 @@ export default {
         this.$message.warning('请先登录')
         return
       }
-      
-      const url = this.isCollected 
-        ? 'http://localhost:8085/user_admin/deleteCollect' 
+
+      const isCancel = this.isCollected
+      const url = isCancel
+        ? 'http://localhost:8085/user_admin/deleteCollect'
         : 'http://localhost:8085/search/searchById/collect'
-      
-      axios.post(url, {
-        uid: this.form.uid,
-        museumId: String(this.museum_id),
-        objectId: String(this.object_id)
-      })
+
+      const params = isCancel
+        ? { userId: this.form.uid, museumId: String(this.museum_id), objectId: String(this.object_id) }
+        : { uid: this.form.uid, museumId: String(this.museum_id), objectId: String(this.object_id) }
+
+      axios.post(url, params)
         .then((response) => {
           if (response.data.state === 200) {
             this.isCollected = !this.isCollected
@@ -967,6 +1027,46 @@ export default {
           console.log(error)
           this.$message.error('操作失败')
         })
+        .finally(() => {
+          window.dispatchEvent(new Event('collectChange'))
+        })
+    },
+    
+    // 添加浏览记录
+    addBrowseHistory () {
+      if (!this.artifact || (!this.artifact.object_id && !this.artifact.objectId)) return
+      
+      const historyItem = {
+        object_id: this.artifact.object_id || this.artifact.objectId,
+        museum_id: this.museum_id,
+        object_name: this.artifact.object_name || this.artifact.title,
+        time_period: this.artifact.time_period || this.artifact.period,
+        img_url: this.artifact.image_url || this.artifact.imageUrl || this.artifact.img_url,
+        browse_time: new Date().toLocaleString('zh-CN')
+      }
+      
+      const history = localStorage.getItem('browse_history')
+      let historyList = []
+      if (history) {
+        try {
+          historyList = JSON.parse(history)
+        } catch (e) {
+          historyList = []
+        }
+      }
+      
+      // 移除重复记录
+      historyList = historyList.filter(item => !(item.object_id === historyItem.object_id && item.museum_id === historyItem.museum_id))
+      
+      // 添加到开头
+      historyList.unshift(historyItem)
+      
+      // 最多保留50条记录
+      if (historyList.length > 50) {
+        historyList = historyList.slice(0, 50)
+      }
+      
+      localStorage.setItem('browse_history', JSON.stringify(historyList))
     },
     
     // 分享功能
@@ -981,27 +1081,72 @@ export default {
         })
     },
     
-    // 发表评论
+    /**
+     * 格式化评论时间
+     */
+    formatCommentTime (time) {
+      if (!time) return ''
+      const date = new Date(time)
+      const now = new Date()
+      const diff = now - date
+      
+      // 1分钟内
+      if (diff < 60 * 1000) {
+        return '刚刚'
+      }
+      // 1小时内
+      if (diff < 60 * 60 * 1000) {
+        return Math.floor(diff / (60 * 1000)) + '分钟前'
+      }
+      // 1天内
+      if (diff < 24 * 60 * 60 * 1000) {
+        return Math.floor(diff / (60 * 60 * 1000)) + '小时前'
+      }
+      // 1周内
+      if (diff < 7 * 24 * 60 * 60 * 1000) {
+        return Math.floor(diff / (24 * 60 * 60 * 1000)) + '天前'
+      }
+      // 更早的显示完整日期
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    },
+    
+    /**
+     * 发表评论
+     */
     submitComment () {
       if (!this.form.uid) {
         this.$message.warning('请先登录')
         return
       }
       
-      axios.post('http://localhost:8085/search/searchById/comment', {
-        rid: this.form.rid,
-        uid: this.form.uid,
+      if (!this.newComment.trim()) {
+        this.$message.warning('请输入评论内容')
+        return
+      }
+      
+      axios.post('http://localhost:8085/search/addComment', {
+        userId: this.form.uid,
+        museumId: parseInt(this.museum_id),
+        objectId: String(this.object_id),
         content: this.newComment.trim()
       })
         .then((response) => {
           if (response.data.state === 200) {
-            this.$message.success('评论成功')
+            this.$message.success(response.data.message || '评论成功，等待审核')
             this.newComment = ''
             this.loadComments()
+          } else {
+            this.$message.error(response.data.message || '评论失败')
           }
         })
         .catch((error) => {
-          console.log(error)
+          console.log('评论失败:', error)
           this.$message.error('评论失败')
         })
     },
@@ -1009,7 +1154,7 @@ export default {
     // 搜索关联实体
     searchEntity (entity) {
       this.$router.push({
-        path: '/keyword',
+        path: '/dataQuery',
         query: { keyword: entity }
       })
     },
@@ -1299,22 +1444,43 @@ export default {
 
 .comment-list {
   margin-bottom: 20px;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .comment-item {
-  padding: 15px 0;
-  border-bottom: 1px dashed #e8e8e8;
+  padding: 15px;
+  background-color: #f9fafc;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    background-color: #f0f2f5;
+  }
 }
 
 .comment-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
+}
+
+.comment-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .comment-author {
   font-weight: bold;
   color: #303133;
+  font-size: 14px;
 }
 
 .comment-time {
@@ -1324,25 +1490,47 @@ export default {
 
 .comment-content {
   color: #606266;
-  line-height: 1.6;
+  line-height: 1.8;
+  font-size: 14px;
+  word-wrap: break-word;
 }
 
 .comment-input-section {
-  display: flex;
-  gap: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e8e8e8;
 }
 
 .comment-textarea {
-  flex: 1;
+  width: 100%;
   padding: 12px;
   border: 1px solid #dcdfe6;
-  border-radius: 4px;
+  border-radius: 8px;
   resize: none;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
     border-color: #409eff;
+    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
   }
+  
+  &::placeholder {
+    color: #c0c4cc;
+  }
+}
+
+.comment-input-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #909399;
 }
 
 /* 全屏遮罩 */

@@ -24,8 +24,8 @@ public class User {
     private Date disabled_at;      // 禁用时间
     private Date created_at;       // 记录创建时间
     private Date updated_at;       // 信息更新时间
-    private Integer user_comment;  // 评论权限（保留原有字段）
-    private Integer user_login;    // 用户登录权限（保留原有字段）
+    private Integer canComment;    // 是否允许评论：1允许 0禁止
+    private Integer canUpload;     // 是否允许上传：1允许 0禁止
 
     public User() {
     }
@@ -174,20 +174,20 @@ public class User {
         this.updated_at = updated_at;
     }
 
-    public Integer getUser_comment() {
-        return user_comment;
+    public Integer getCanComment() {
+        return canComment;
     }
 
-    public void setUser_comment(Integer user_comment) {
-        this.user_comment = user_comment;
+    public void setCanComment(Integer canComment) {
+        this.canComment = canComment;
     }
 
-    public Integer getUser_login() {
-        return user_login;
+    public Integer getCanUpload() {
+        return canUpload;
     }
 
-    public void setUser_login(Integer user_login) {
-        this.user_login = user_login;
+    public void setCanUpload(Integer canUpload) {
+        this.canUpload = canUpload;
     }
 
     @Override
@@ -211,8 +211,8 @@ public class User {
                 ", disabled_at=" + disabled_at +
                 ", created_at=" + created_at +
                 ", updated_at=" + updated_at +
-                ", user_comment=" + user_comment +
-                ", user_login=" + user_login +
+                ", canComment=" + canComment +
+                ", canUpload=" + canUpload +
                 '}';
     }
 }

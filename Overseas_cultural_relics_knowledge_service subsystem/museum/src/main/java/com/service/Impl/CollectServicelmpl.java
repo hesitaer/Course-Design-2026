@@ -16,6 +16,11 @@ public class CollectServicelmpl implements CollectService {
     @Autowired
     private CollectMapper collectmapper;
 
+    private String stripHtml(String s) {
+        if (s == null) return null;
+        return s.replaceAll("<[^>]+>", "");
+    }
+
     @Override
     public Integer addcollection(Collect collect) {
         Collect result = collectmapper.findByUserIdAndArtifact(
@@ -40,7 +45,11 @@ public class CollectServicelmpl implements CollectService {
 
     @Override
     public List<CollectView> collectionfromuid(Long userId) {
-        return collectmapper.findByUserId(userId);
+        List<CollectView> list = collectmapper.findByUserId(userId);
+        for (CollectView cv : list) {
+            cv.setObjectName(stripHtml(cv.getObjectName()));
+        }
+        return list;
     }
 
     @Override

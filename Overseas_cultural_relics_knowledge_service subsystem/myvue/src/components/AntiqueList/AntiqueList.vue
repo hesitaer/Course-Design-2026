@@ -67,7 +67,7 @@
               >
                 <div class="image-container">
                   <img 
-                    :src="getValidImageUrl(item.image_url || item.img_url)" 
+                    :src="getValidImageUrl(item)" 
                     class="card-image" 
                     alt=""
                     @error="handleImageError($event)"
@@ -127,7 +127,7 @@
             <router-link 
               :to="{path: '/antiqueDetail', query: {museum_id: scope.row.museum_id, object_id: scope.row.object_id}}"
             >
-              <img :src="getValidImageUrl(scope.row.image_url || scope.row.img_url)" class="list-image" alt="">
+              <img :src="getValidImageUrl(scope.row)" class="list-image" alt="">
             </router-link>
           </template>
         </el-table-column>
@@ -236,6 +236,8 @@ export default {
       currentSort: '',
       sortOrder: 'asc',
       defaultImage: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f5f5f5" width="200" height="200"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3E暂无图片%3C/text%3E%3C/svg%3E',
+      // 服务器图片API地址（仅用于博物馆2、3）
+      serverApiBase: 'http://47.96.152.190:8000',
       // 响应式对比列表
       compareList: []
     }
@@ -444,13 +446,24 @@ export default {
     },
     
     // 校验图片URL是否有效
-    getValidImageUrl (imageUrl) {
+    getValidImageUrl (item) {
+      const { image_url, img_url, museum_id, object_id } = item
+      const imageUrl = image_url || img_url
+      const museumIdNum = parseInt(museum_id)
+      
+      // 仅博物馆2、3调用服务器API
+      if (museumIdNum === 2 || museumIdNum === 3) {
+        if (object_id && object_id !== 'null' && object_id !== 'undefined') {
+          return `${this.serverApiBase}/api/img/${museumIdNum}/${object_id}`
+        }
+        return this.defaultImage
+      }
+      
+      // 其他博物馆（如博物馆1）使用原有逻辑
       if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') {
         return this.defaultImage
       }
-      // 检查URL是否完整（包含http://或https://）
       if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-        // 不完整的URL，使用默认图片
         return this.defaultImage
       }
       return imageUrl
@@ -547,7 +560,8 @@ export default {
         period_start_year: item.period_start_year,
         period_end_year: item.period_end_year,
         culture: item.culture || '',
-        image_url: item.image_url || ''
+        image_url: item.image_url || '',
+        img_url: item.img_url || ''
       }
       this.compareList.push(compareItem)
       localStorage.setItem('compareList', JSON.stringify(this.compareList))
