@@ -44,6 +44,12 @@
         </div>
       </router-link>
 
+      <router-link to="/museum-map">
+  <div class="float-left">
+    <el-menu-item class="disable-element-hover" index="museum-map">地理分布</el-menu-item>
+  </div>
+</router-link>
+
       <router-link to="/login" v-if="!isLogin">
         <div class="float-right">
           <el-menu-item class="disable-element-hover" index="login">登录</el-menu-item>
