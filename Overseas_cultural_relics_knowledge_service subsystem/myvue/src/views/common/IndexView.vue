@@ -152,12 +152,12 @@ export default {
       museums: [],
       recentUpdates: [],
       popularDynasties: [
-        { name: '唐朝', icon: '唐', desc: '盛世华章，文化繁荣', count: 156 },
-        { name: '宋朝', icon: '宋', desc: '风雅美学，科技发达', count: 132 },
-        { name: '明朝', icon: '明', desc: '工艺精湛，商业繁荣', count: 148 },
-        { name: '清朝', icon: '清', desc: '文化融合，藏品丰富', count: 167 },
-        { name: '汉朝', icon: '汉', desc: '丝绸之路，中西交流', count: 98 },
-        { name: '商朝', icon: '商', desc: '青铜文明，甲骨文', count: 67 }
+        { name: '唐朝', icon: '唐', desc: '盛世华章，文化繁荣', count: 273 },
+        { name: '宋朝', icon: '宋', desc: '风雅美学，科技发达', count: 625 },
+        { name: '明朝', icon: '明', desc: '工艺精湛，商业繁荣', count: 816 },
+        { name: '清朝', icon: '清', desc: '文化融合，藏品丰富', count: 2209 },
+        { name: '汉朝', icon: '汉', desc: '丝绸之路，中西交流', count: 590 },
+        { name: '商朝', icon: '商', desc: '青铜文明，甲骨文', count: 216 }
       ],
       stats: {
         antiques: 0,
@@ -243,17 +243,17 @@ export default {
     // 获取博物馆位置
     getMuseumLocation (museumName) {
       const locations = {
-        'British Museum': '英国伦敦',
-        'Metropolitan Museum of Art': '美国纽约',
-        'Musée du Louvre': '法国巴黎',
-        'Tokyo National Museum': '日本东京'
+        'Harvard Art Museums': '美国马萨诸塞州剑桥',
+        'Museum of Fine Arts, Boston': '美国马萨诸塞州波士顿',
+        'Smithsonian Institution': '美国华盛顿特区',
+       
       }
       return locations[museumName] || '未知'
     },
 
     // 加载近期更新
     loadRecentUpdates () {
-      axios.post('http://localhost:8085/search/classification', { c: 'dynasty', v_1: 'Ming' })
+      axios.post('http://localhost:8085/search/classification', { c: 'dynasty', v_1: 'Ming（明）' })
         .then(response => {
           if (response.data.state === 200) {
             this.recentUpdates = response.data.data.slice(0, 5).map(item => ({
@@ -294,7 +294,7 @@ export default {
         })
     },
 
-    // 获取模拟文物数据
+    // 获取模拟文物数据（死数据）
     getMockAntiques () {
       return [
         { object_id: '1', museum_id: '1', title: '青铜方鼎', dynasty: '商', material: '青铜', museum: '大英博物馆', image_url: 'https://picsum.photos/seed/bronze1/300/300' },
